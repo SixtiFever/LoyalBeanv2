@@ -1,0 +1,1 @@
+export type CustomerRecord = Record<string, {scans: number, redeems: number}>

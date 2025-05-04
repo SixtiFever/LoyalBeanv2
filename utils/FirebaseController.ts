@@ -1,0 +1,238 @@
+import { firestore } from "@/firebaseconfig";
+import { Card } from "@/types/Card";
+import { CustomerRecord } from "@/types/CustomerRecord";
+import { PromotionRecord } from "@/types/Promotion";
+import { Cafe, Customer } from "@/types/User";
+import { UserCredential } from "firebase/auth";
+import { collection, doc, DocumentData, DocumentSnapshot, getDoc, runTransaction, setDoc, Timestamp } from "firebase/firestore";
+import { v4 as uuidv4 } from 'uuid';
+import { extractDayMonthYear } from "./utils";
+
+export const postNewUserFirestore = async (usercredential: UserCredential, user: Customer) => {
+    const uid: string = usercredential.user.uid;
+    const userObj: Customer = {
+        ...user,
+        id: uid,
+        cafes: [],
+    }
+
+    const colRef = collection(firestore, 'customers');
+    const docRef = doc(colRef, uid);
+
+    try {
+        await setDoc(docRef, userObj)
+    } catch(err) {
+        console.log(err);
+    }
+    
+}
+
+export const postNewUserId = async (user: UserCredential) => {
+    if (!user || !user.user.email) return;
+    const colRef = collection(firestore, 'customerids');
+    const docRef = doc(colRef, user.user.email);
+    await setDoc(docRef, { 'id' : user.user.uid })
+}
+
+
+export const postNewCafe = async (cafe: Partial<Cafe>) => {
+    const colRef = collection(firestore, 'cafes');
+    const docRef = doc(colRef, cafe.id);
+    console.log(cafe)
+    try {
+        await setDoc(docRef, cafe);
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const createCardsDocument = async (id: string): Promise<void> => {
+    const colRef = collection(firestore, 'cards');
+    const docRef = doc(colRef, id);
+    try {
+        await setDoc(docRef, {});
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const postNewCafeId = async (cafe: Partial<Cafe>) => {
+    const colRef = collection(firestore, 'cafeids');
+    const docRef = doc(colRef, cafe.email);
+    try {
+        await setDoc(docRef, { 'id': cafe.id })
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const fetchId = async (email: string, type: 'cafeids' | 'customerids'): Promise<string | boolean> => {
+    const result = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, type);
+        const docRef = doc(colRef, email);
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
+        if ( snap.exists() ) {
+            return snap.data().id
+        }
+        return false
+    }).catch(err => {
+        console.log(err);
+    })
+    return result
+}
+
+export const fetchData = async (id: string, type: 'cafes' | 'customers'): Promise<Cafe | Customer | boolean> => {
+
+    const result: Cafe | Customer | boolean = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, type);
+        const docRef = doc(colRef, id);
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
+        console.log(snap.data());
+        if ( !snap.exists() ) {
+            return false;
+        }
+        return snap.data();
+    });
+    return result;
+}
+
+export const fetchCards = async (id: string): Promise<void | DocumentData> => {
+    const result: void | DocumentData = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, 'cards');
+        const docRef = doc(colRef, id);
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
+        if (snap.exists()) {
+            return snap.data();
+        }
+    }).catch(err => {
+        console.log(err);
+    })
+
+    return result;
+}
+
+
+export const checkForCard = async (cafeId: string, customerId: string) => {
+    const colRef = collection(firestore, 'cards');
+    const docRef = doc(colRef, cafeId);
+    const snap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+    if ( snap.exists() ) {
+        const hasCard: boolean = snap.data()[customerId] ? true : false;
+        return hasCard;
+    }
+    return false;
+}
+
+export const postNewCard = async (cafeId: string, customerId: string | undefined, card: Card): Promise<boolean>  => {
+    try {
+        const colRef = collection(firestore, 'cards');
+        const docRef = doc(colRef, cafeId);
+        const snap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+        if ( !snap.exists() ) return false;
+        await setDoc(docRef, { [customerId as string]: card }, {merge: true});
+        return true;
+    } catch (err) {
+        console.log(err);
+    }
+    return false;
+}
+
+export const fetchCustomerCards = async (id: string) => {
+    const result = await runTransaction(firestore, async (transaction) => {
+
+        const colRefUser = collection(firestore, 'customers');
+        const docRefUser = doc(colRefUser, id);
+
+        const colRefCard = collection(firestore, 'cards');
+
+        const customerSnap = await transaction.get(docRefUser);
+        console.log(customerSnap.data());
+        if ( !customerSnap.exists() ) return;
+        const cafeids: string[] = customerSnap.data().cafes ?? [];
+
+        let cards = []
+        for (let i = 0; i < cafeids.length; i++ ) {
+            const snap = await transaction.get(doc(colRefCard, cafeids[i]));
+            console.log(snap.data());
+            if ( snap.exists() ) {
+                const card = snap.data()[`${id}`]
+                cards.push(card);
+            }
+            
+        }
+        return cards;
+    })
+    return result;
+}
+
+export const addCafeIdToCustomerAccount = async (customerId: string, cafeId: string): Promise<boolean | string[]> => {
+    const colRef = collection(firestore, 'customers');
+    const docRef = doc(colRef, customerId);
+    const snap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+    if (!snap.exists()) return false;
+    const cafes: string [] = await snap.data().cafes ?? [];
+    if (!cafes.includes(cafeId)) {
+        cafes.push(cafeId);
+        await setDoc(docRef, { 'cafes': cafes }, {merge: true});
+        return cafes;
+    } else {
+        console.log('Cafe id exists');
+        return false;
+    }
+}
+
+export const createCustomerRecord = async (cafeId: string, customerId: string, x: number): Promise<boolean | void | CustomerRecord> => {
+    const result: boolean | void | CustomerRecord = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, 'cafes');
+        const docRef = doc(colRef, cafeId);
+        const snap = await transaction.get(docRef);
+        if ( !snap.exists() ) return false;
+        // assign customer record from cafe doc. If not found, create one.
+        const record: CustomerRecord = {[customerId] : { scans: 0, redeems: 0 }};
+        console.log(record);
+        record[customerId].scans += x
+        transaction.set(docRef, { 'customers': record }, {merge: true});
+        return record;
+    }).catch(err => {
+        console.log(err);
+    })
+    return result;
+}
+
+
+export const createPromotionRecord = (cafeObject: Partial<Cafe>): PromotionRecord | false => {
+    if ( !cafeObject.redeemCount || !cafeObject.reward ) {
+        return false;
+    }
+    const id: string = uuidv4()
+    const { day, month, year } = extractDayMonthYear(Timestamp.now().toDate());
+    const promotion: PromotionRecord = { 
+        promotionId: id,
+        active: false,
+        purchaseMilestone: cafeObject.redeemCount,
+        reward: cafeObject.reward,
+        scans: 0,
+        redeems: 0,
+        startDateTimestamp: Timestamp.now(),
+        startDateFull: Timestamp.now().toDate(),
+        startDateDay: day,
+        startDateMonth: month,
+        startDateYear: year,
+    }
+    return promotion;
+}
+
+// sets promotion active to true and adds to the promotions/cafeid document
+export const activateFirstPromotion = async (cafeId: string, promotion: PromotionRecord): Promise<boolean> => {
+    const colRef = collection(firestore, 'promotions');
+    const docRef = doc(colRef, cafeId);
+    const snap = await getDoc(docRef);
+    promotion.active = true;
+    try {
+        await setDoc(docRef, { [promotion.promotionId]: promotion }, { merge: true });
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+    return true;
+}

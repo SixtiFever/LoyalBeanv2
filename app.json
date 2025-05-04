@@ -33,6 +33,28 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],[
+        "expo-font",
+        {
+            "fonts": ["/assets/fonts/NationalPark-VariableFont_wght.ttf"]
+        }
+      ], [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+        }
       ]
     ],
     "experiments": {
