@@ -64,6 +64,7 @@ const ScanCamera = () => {
             const [cafeId, quantity]: string[] = result.data.split(splitPattern);
             if (parseInt(quantity) < 1) {
                 console.log('value less than 1')
+                return;
             }
             if (!user?.uid) return;
             updateCard(cafeId, user.uid, parseInt(quantity));
@@ -94,7 +95,7 @@ const ScanCamera = () => {
             userEmail: user?.email ?? undefined,
             cafeId: cafeId,
             reward: cafeData.reward,
-            currentCount: cafeData.redeemCount - (quantity % cafeData.redeemCount),
+            currentCount: quantity,
             countRequiredRedeem: cafeData.redeemCount,
             totalScanCount: quantity,
             totalRedeemCount: 0,

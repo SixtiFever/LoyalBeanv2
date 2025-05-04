@@ -1,12 +1,12 @@
-import { useNavigation, useRouter } from "expo-router"
-import { getAuth } from "firebase/auth";
-import { memo, useEffect, useLayoutEffect } from "react"
-import { View, Text, StyleSheet } from "react-native"
-import CustomNavbar from '@/components/navbar';
-import { PlusIcon, SettingsIcon } from "@/assets/icons";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { FlatList } from "react-native";
 import useFetchCards from "@/app/hooks/useFetchCards";
+import { PlusIcon, SettingsIcon } from "@/assets/icons";
+import { LoyaltyCard } from "@/components/LoyaltyCard";
+import CustomNavbar from '@/components/navbar';
+import { useNavigation, useRouter } from "expo-router";
+import { getAuth } from "firebase/auth";
+import { memo, useEffect, useLayoutEffect } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const YourCards = () => {
 
@@ -77,7 +77,7 @@ const YourCards = () => {
         }
 
         if ( cards ) {
-            console.log(cards)
+            console.log('Here are your cards: ', cards)
             return (
                 <SafeAreaView edges={["top"]} style={styles.container}>
 
@@ -88,7 +88,9 @@ const YourCards = () => {
                         fontWeight="300"
                         fontSize={16}
                         rightIcon={<PlusIcon width="25" height="25" onPress={handleNavNewCardScanner} />} />
-                        {/* <FlatList renderItem={({item}) => <Text>{item}</Text>} data={cards} /> */}
+                        <FlatList 
+                            renderItem={({ item }) => <LoyaltyCard data={item} />}
+                            data={cards} />
                         
                 </SafeAreaView>
             )

@@ -1,3 +1,4 @@
+import { Card } from "@/types/Card";
 import { getUid } from "@/utils/FirebaseAuthentication";
 import { fetchCustomerCards } from "@/utils/FirebaseController";
 import { useEffect, useState } from "react";
@@ -5,7 +6,7 @@ import { useEffect, useState } from "react";
 
 const useFetchCards = () => {
 
-    const [cards, setCards] = useState<any[]>();
+    const [cards, setCards] = useState<Card[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<boolean>()
 
