@@ -4,7 +4,7 @@ import { fetchCustomerCards } from "@/utils/FirebaseController";
 import { useEffect, useState } from "react";
 
 
-const useFetchCards = () => {
+const useFetchCards = (): Card => {
 
     const [cards, setCards] = useState<Card[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);

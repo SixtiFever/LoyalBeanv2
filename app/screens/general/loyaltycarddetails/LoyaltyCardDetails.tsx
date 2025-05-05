@@ -1,3 +1,4 @@
+import useFetchCard from "@/app/hooks/useFetchCard"
 import { ActionButton } from "@/components/buttons"
 import { Card } from "@/types/Card"
 import { useLocalSearchParams, useRouter } from "expo-router"
@@ -13,26 +14,49 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
 
     const state = useLocalSearchParams();
     const router = useRouter();
-    state.currentCount = 7;
-    console.log(state);
+    const [card, isLoading, error] = useFetchCard(state.userId as string, state.cafeId as string);
 
     const handleNavScanner = () => {
         router.navigate({
             pathname: '/screens/general/repeatscanner/RepeatScanner',
             params: { 
-                currentCount: state.currentCount,
-                redeemCount: state.countRequiredRedeem }
+                currentCount: card.currentCount,
+                redeemCount: card.countRequiredRedeem }
         })
     }
 
-    return (
-        <View style={styles.container}>
-            <Text>Test</Text>
-            <Text>{state.currentCount}</Text>
-            <Text>{state.countRequiredRedeem}</Text>
-            <ActionButton onPress={handleNavScanner} title="Scan" color={'pink'} />
-        </View>
-    )
+    if (error && !isLoading) {
+        console.log(state)
+        console.log(card)
+        console.log(isLoading)
+        console.log(error)
+        return (
+            <View>
+                <Text>Error</Text>
+            </View>
+        )
+    }
+
+    if (isLoading && !error) {
+        return (
+            <View>
+                <Text>Loading card data...</Text>
+            </View>
+        )
+    }
+
+    if ( card ) {
+
+        return (
+            <View style={styles.container}>
+                <Text>{ card.reward }</Text>
+                <Text>{card.currentCount}</Text>
+                <Text>{card.countRequiredRedeem}</Text>
+                <ActionButton onPress={handleNavScanner} title="Scan" color={'pink'} />
+            </View>
+        )
+
+    }
 }
 
 const styles = StyleSheet.create({

@@ -43,11 +43,14 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
 
     // performCardActionsAsync
     const updateCard = async (quantity: number, currentCount: number, redeemCount: number) => {
+        // calculate new scan count
         const scanCount: number = quantity + currentCount;
         const newScanCount: number = scanCount > redeemCount ? (scanCount % redeemCount) - 1 : scanCount;
-        console.log(`Original scan count: ${currentCount} \n Quantity: ${quantity} \n New scan count: ${newScanCount}`)
 
-        // fetch card information
+        // update customers card for the cafe
+
+        // update cafes promotion
+       
     }
 
     return (

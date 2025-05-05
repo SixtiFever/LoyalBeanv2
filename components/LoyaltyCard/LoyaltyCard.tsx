@@ -1,15 +1,37 @@
+import useFetchCard from "@/app/hooks/useFetchCard";
+import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
 import { useRouter } from "expo-router";
-import { memo } from "react";
+import { User } from "firebase/auth";
+import { collection, doc, onSnapshot } from "firebase/firestore";
+import { memo, useEffect, useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 
 interface CardProps {
+    user: User;
+    cafeId: string;
     data: Card;
 }
 
-const LoyaltyCard: React.FC<CardProps> = ({data}) => {
+const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
 
     const router = useRouter();
+    const [card, isLoading, error] = useFetchCard(user.uid, cafeId);
+    const [cardData, setCardData] = useState<Card>();
+
+    useEffect(() => {
+
+        const colRef = collection(firestore, 'cards');
+        const docRef = doc(colRef, cafeId);
+        const unsubscribe = onSnapshot(docRef, async (snap) => {
+            if (!snap.exists()) return;
+            const card: Card = await snap.data()[user.uid]
+            setCardData(card);
+        })
+
+        return () => unsubscribe();
+
+    }, [])
 
     const handleNav = () => {
         router.navigate({
@@ -32,12 +54,14 @@ const LoyaltyCard: React.FC<CardProps> = ({data}) => {
         })
     }
 
-    return (
-        <View style={styles.container}>
-            <Text>{data.currentCount} out of {data.countRequiredRedeem}</Text>
-            <Button onPress={handleNav} title="scan" />
-        </View>
-    )
+    if ( cardData && card ) {
+        return (
+            <View style={styles.container}>
+                <Text>{cardData.currentCount ?? card?.currentCount} out of {cardData.countRequiredRedeem ?? card.countRequiredRedeem}</Text>
+                <Button onPress={handleNav} title="scan" />
+            </View>
+        )
+    }
 }
 
 const styles = StyleSheet.create({

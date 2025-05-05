@@ -3,8 +3,8 @@ import { PlusIcon, SettingsIcon } from "@/assets/icons";
 import { LoyaltyCard } from "@/components/LoyaltyCard";
 import CustomNavbar from '@/components/navbar';
 import { useNavigation, useRouter } from "expo-router";
-import { getAuth } from "firebase/auth";
-import { memo, useEffect, useLayoutEffect } from "react";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { memo, useEffect, useLayoutEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,6 +14,7 @@ const YourCards = () => {
     const router = useRouter();
     const auth = getAuth();
     const [cards, isLoading, error] = useFetchCards();
+    const [user, setUser] = useState<User>()
 
     // const cards = [
     //     {
@@ -40,6 +41,10 @@ const YourCards = () => {
     }, []);
 
     useEffect(() => {
+
+        onAuthStateChanged(getAuth(), (user) => {
+            if (user) setUser(user);
+        })
 
     }, [])
 
@@ -76,7 +81,7 @@ const YourCards = () => {
             )
         }
 
-        if ( cards ) {
+        if ( cards && user ) {
             console.log('Here are your cards: ', cards)
             return (
                 <SafeAreaView edges={["top"]} style={styles.container}>
@@ -89,7 +94,13 @@ const YourCards = () => {
                         fontSize={16}
                         rightIcon={<PlusIcon width="25" height="25" onPress={handleNavNewCardScanner} />} />
                         <FlatList 
-                            renderItem={({ item }) => <LoyaltyCard data={item} />}
+                            renderItem={({ item }) => 
+                                <LoyaltyCard 
+                                    user={user} 
+                                    cafeId={item.cafeId} 
+                                    data={item} />
+                                }
+                                
                             data={cards} />
                         
                 </SafeAreaView>
