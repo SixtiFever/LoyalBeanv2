@@ -1,7 +1,7 @@
 import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
 import { CustomerRecord } from "@/types/CustomerRecord";
-import { PromotionRecord } from "@/types/Promotion";
+import { PromotionInteractions, PromotionRecord } from "@/types/Promotion";
 import { Cafe, Customer } from "@/types/User";
 import { UserCredential } from "firebase/auth";
 import { collection, doc, DocumentData, DocumentSnapshot, getDoc, runTransaction, setDoc, Timestamp } from "firebase/firestore";
@@ -235,4 +235,52 @@ export const activateFirstPromotion = async (cafeId: string, promotion: Promotio
         return false;
     }
     return true;
+}
+
+
+// update promotion interactions
+export const updatePromotionInteractions = async (cafeId: string, activePromotion: PromotionRecord, userId: string, quantity: number, redeems: number) => {
+    const result = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, 'promotions');
+        const docRef = doc(colRef, cafeId);
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
+        if (!snap.exists()) return;
+        const newInteraction: PromotionInteractions = { [userId]: { scans: quantity, redeems: redeems } };
+        if ( !snap.data()[activePromotion.promotionId][userId] ) {
+            transaction.set(docRef, { [activePromotion.promotionId]: newInteraction }, { merge: true })
+        } else {
+            const oldInteraction: PromotionInteractions = snap.data()[activePromotion.promotionId][userId];
+            console.log(newInteraction)
+            console.log(oldInteraction);
+            const newScans = newInteraction[userId].scans + oldInteraction.scans;
+            const newRedeems = newInteraction[userId].redeems + oldInteraction.redeems;
+            transaction.set(docRef, { [activePromotion.promotionId]: { [userId]: { scans: newScans, redeems: newRedeems }}}, {merge: true});
+        }
+        
+    }).catch(err => {
+        console.log(err);
+    })
+}
+
+
+export const getActivePromotion = async (cafeId: string) => {
+    const colRef = collection(firestore, 'promotions');
+    const docRef = doc(colRef, cafeId);
+    try {
+        const snap = await getDoc(docRef)
+        if ( !snap.exists() ) return;
+        const promotions = snap.data();
+        // Find the key where active is true
+        const activeKey: string | undefined = Object.keys(promotions).find(
+            key => promotions[key].active === true
+        );
+        if(!activeKey) return;
+
+        const activePromotion = promotions[activeKey]
+        console.log(activePromotion)
+        return activePromotion;
+    } catch (err) {
+        console.log(err);
+    }
+    
 }

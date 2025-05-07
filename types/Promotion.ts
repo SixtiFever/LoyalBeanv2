@@ -22,4 +22,4 @@ export type PromotionRecord = {
 }
 
 
-type PromotionInteractions = Record<string, {scans: number, redeems: number}>
+export type PromotionInteractions = Record<string, {scans: number, redeems: number}>

@@ -1,5 +1,7 @@
 import { firestore } from "@/firebaseconfig"
 import { Card } from "@/types/Card"
+import { PromotionRecord } from "@/types/Promotion"
+import { getActivePromotion, updatePromotionInteractions } from "@/utils/FirebaseController"
 import { splitPattern } from "@/utils/utils"
 import { BarcodeScanningResult, CameraView } from "expo-camera"
 import { useLocalSearchParams } from "expo-router"
@@ -51,9 +53,10 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
         // calculate new scan count
         const scanCount: number = quantity + currentCount;
         const newScanCount: number = scanCount > redeemCount ? (scanCount % redeemCount) - 1 : scanCount;
-
+        
         // update customers card for the cafe
         const result: void | Card = await runTransaction(firestore, async (transaction) => {
+            const activePromotion: PromotionRecord = await getActivePromotion(cid);
             const colRef = collection(firestore, 'cards');
             const docRef = doc(colRef, cid);
             const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
@@ -66,6 +69,11 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 console.log('Can\'t find customers loyalty card');
                 return;
             }
+            
+            if (!activePromotion) {
+                console.log('Couldn\'t find promotion');
+                return;
+            }
             card.currentCount = newScanCount;
             card.totalRedeemCount = scanCount > card.countRequiredRedeem ? card.totalRedeemCount + 1 : card.totalRedeemCount;
             card.dateCardUpdated = Timestamp.now();
@@ -75,8 +83,10 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
             return card
         }).catch(err => {
             console.log(err);
-        })
-        // update cafes promotion
+        });
+        const activePromotion: PromotionRecord = await getActivePromotion(cid);
+        console.log(activePromotion);
+        await updatePromotionInteractions(cid, activePromotion, uid, quantity, scanCount > redeemCount ? 1 : 0 );
        
     }
 
