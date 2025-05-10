@@ -58,6 +58,8 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
         return (
             <View style={styles.container}>
                 <Text>{cardData.currentCount ?? card?.currentCount} out of {cardData.countRequiredRedeem ?? card.countRequiredRedeem}</Text>
+                <Text>{cardData.cafeId}</Text>
+                <Text>{cardData.dateCardUpdated.toDate().toDateString()}</Text>
                 <Button onPress={handleNav} title="scan" />
             </View>
         )

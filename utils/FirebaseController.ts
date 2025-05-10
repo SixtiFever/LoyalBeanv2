@@ -3,7 +3,7 @@ import { Card } from "@/types/Card";
 import { CustomerRecord } from "@/types/CustomerRecord";
 import { PromotionInteractions, PromotionRecord } from "@/types/Promotion";
 import { Cafe, Customer } from "@/types/User";
-import { UserCredential } from "firebase/auth";
+import { User, UserCredential } from "firebase/auth";
 import { collection, doc, DocumentData, DocumentSnapshot, getDoc, runTransaction, setDoc, Timestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import { extractDayMonthYear } from "./utils";
@@ -96,6 +96,8 @@ export const fetchData = async (id: string, type: 'cafes' | 'customers'): Promis
     return result;
 }
 
+
+// fetch cafes cards
 export const fetchCards = async (id: string): Promise<void | DocumentData> => {
     const result: void | DocumentData = await runTransaction(firestore, async (transaction) => {
         const colRef = collection(firestore, 'cards');
@@ -137,8 +139,8 @@ export const postNewCard = async (cafeId: string, customerId: string | undefined
     return false;
 }
 
-export const fetchCustomerCards = async (id: string) => {
-    const result = await runTransaction(firestore, async (transaction) => {
+export const fetchCustomerCards = async (id: string): Promise<Card[] | void> => {
+    const result: Card[] | void = await runTransaction(firestore, async (transaction) => {
 
         const colRefUser = collection(firestore, 'customers');
         const docRefUser = doc(colRefUser, id);
@@ -147,15 +149,18 @@ export const fetchCustomerCards = async (id: string) => {
 
         const customerSnap = await transaction.get(docRefUser);
         console.log(customerSnap.data());
-        if ( !customerSnap.exists() ) return;
+        if ( !customerSnap.exists() ) {
+            console.log('Customer snap doesn\'t exist');
+            return;
+        }
         const cafeids: string[] = customerSnap.data().cafes ?? [];
 
-        let cards = []
+        let cards: Card[] = []
         for (let i = 0; i < cafeids.length; i++ ) {
             const snap = await transaction.get(doc(colRefCard, cafeids[i]));
             console.log(snap.data());
             if ( snap.exists() ) {
-                const card = snap.data()[`${id}`]
+                const card: Card = snap.data()[`${id}`]
                 cards.push(card);
             }
             
@@ -284,3 +289,14 @@ export const getActivePromotion = async (cafeId: string) => {
     }
     
 }
+
+
+export const getCafeIds = async (user: User): Promise<string[] | undefined> => {
+    const colRef = collection(firestore, 'customers');
+    const docRef = doc(colRef, user.uid);
+    const snap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+    if (!snap.exists()) return;
+    return snap.data().cafes ?? []
+}
+
+

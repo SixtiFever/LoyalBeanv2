@@ -2,8 +2,12 @@ import useFetchCards from "@/app/hooks/useFetchCards";
 import { PlusIcon, SettingsIcon } from "@/assets/icons";
 import { LoyaltyCard } from "@/components/LoyaltyCard";
 import CustomNavbar from '@/components/navbar';
+import { firestore } from "@/firebaseconfig";
+import { Card } from "@/types/Card";
+import { fetchCustomerCards, getCafeIds } from "@/utils/FirebaseController";
 import { useNavigation, useRouter } from "expo-router";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { collection, doc, onSnapshot } from "firebase/firestore";
 import { memo, useEffect, useLayoutEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,22 +18,9 @@ const YourCards = () => {
     const router = useRouter();
     const auth = getAuth();
     const [cards, isLoading, error] = useFetchCards();
+    const [updatedCards, setUpdatedCards] = useState<Card[]>();
+    const [cafeIds, setCafeIds] = useState<string[]>();
     const [user, setUser] = useState<User>()
-
-    // const cards = [
-    //     {
-    //       id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    //       title: 'First Item',
-    //     },
-    //     {
-    //       id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    //       title: 'Second Item',
-    //     },
-    //     {
-    //       id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    //       title: 'Third Item',
-    //     },
-    //   ];
       
 
     useLayoutEffect(() => {
@@ -38,15 +29,65 @@ const YourCards = () => {
             headerShown: false,
         });
 
+        onAuthStateChanged(getAuth(), async (user) => {
+            if (user) {
+                setUser(user);
+                const cafeids: string[] | undefined = await getCafeIds(user);
+                setCafeIds(cafeids);
+            }
+        })
+
     }, []);
 
     useEffect(() => {
 
-        onAuthStateChanged(getAuth(), (user) => {
-            if (user) setUser(user);
+        // onAuthStateChanged(getAuth(), (user) => {
+        //     if (user) {
+        //         setUser(user);
+        //         // listener on customers document to add / delete cards bases on cafeid array
+        //         const colRef = collection(firestore, 'customers');
+        //         const docRef = doc(colRef, user.uid);
+        //         onSnapshot(docRef, async (snap) => {
+                    
+        //             setCafeIds(cafeIds);
+        //         })
+
+        //     }
+        // })
+        if (!user) { 
+            console.log('Can\'t pull user');
+            return;
+         }
+        const colRef = collection(firestore, 'customers');
+        const docRef = doc(colRef, user.uid);
+        const unsubscribe = onSnapshot(docRef, async (snap) => {
+            if (snap.exists()) {
+                setCafeIds(snap.data().cafes ?? []);
+            }
         })
 
-    }, [])
+        return () => {
+            unsubscribe();
+        }
+
+    }, [user]);
+
+    useEffect(() => {
+
+        // udate cards
+        console.log('Fetching new cards')
+        if ( user && user.uid ) {
+            const fetchCards = async () => {
+                const cards: Card[] | void = await fetchCustomerCards(user?.uid);
+                if (cards) {
+                    setUpdatedCards(cards);
+                }
+            }
+            fetchCards();
+        }
+        
+
+    }, [cafeIds, user])
 
 
     if (auth.currentUser === null) {
@@ -101,7 +142,7 @@ const YourCards = () => {
                                     data={item} />
                                 }
                                 
-                            data={cards} />
+                            data={updatedCards ?? cards} />
                         
                 </SafeAreaView>
             )
