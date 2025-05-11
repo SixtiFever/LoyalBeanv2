@@ -1,19 +1,18 @@
-import { SafeAreaView } from "react-native-safe-area-context"
-import CustomNavbar from '@/components/navbar'
-import { memo, useCallback, useEffect, useLayoutEffect, useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
-import { router, useNavigation } from "expo-router"
-import { DashboardIcon, SettingsIcon } from "@/assets/icons"
-import useFetchCafeData from "@/app/hooks/useFetchCafeData"
 import useFetchCafeCards from "@/app/hooks/useFetchCafeCards"
-import { collection, doc, DocumentData, onSnapshot } from "firebase/firestore"
-import { firestore } from "@/firebaseconfig"
-import { Cafe } from "@/types/User"
-import { getAuth, onAuthStateChanged } from "firebase/auth"
-import QRCode from "react-native-qrcode-svg"
+import useFetchCafeData from "@/app/hooks/useFetchCafeData"
+import { DashboardIcon, SettingsIcon } from "@/assets/icons"
 import { ActionButton } from "@/components/buttons"
-import NumberPickerLocal from '@/components/NumericInputLocal';
+import CustomNavbar from '@/components/navbar'
+import NumberPickerLocal from '@/components/NumericInputLocal'
+import { Cafe } from "@/types/User"
 import { splitPattern } from "@/utils/utils"
+import { router, useNavigation } from "expo-router"
+import { getAuth, onAuthStateChanged } from "firebase/auth"
+import { DocumentData } from "firebase/firestore"
+import { memo, useCallback, useLayoutEffect, useState } from "react"
+import { StyleSheet, Text, View } from "react-native"
+import QRCode from "react-native-qrcode-svg"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const CafeHome = () => {
 
@@ -42,29 +41,6 @@ const CafeHome = () => {
 
     }, [])
 
-    // useEffect(() => {
-
-    //     if (!id) return;
-
-    //     const colRef = collection(firestore, 'cards');
-    //     const docRef = doc(colRef, id)
-    //     const unsubCards = onSnapshot(docRef, async (snap) => {
-    //         setCardsData(snap.data());
-    //     })
-
-    //     const colRefCafes = collection(firestore, 'cafes');
-    //     const docRefCafe = doc(colRefCafes, id)
-    //     const unsubCafesData = onSnapshot(docRefCafe, async (snap) => {
-    //         if (snap !== null) {
-    //             setCafeData(snap.data() as Cafe);
-    //         }
-    //     })
-
-    //     return () => {
-    //         unsubCards();
-    //         unsubCafesData();
-    //     }
-    // }, [id])
 
     const handleQuantityChange = useCallback((val: number) => {
         setQuantity(val);

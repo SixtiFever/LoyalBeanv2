@@ -18,6 +18,8 @@ export type PromotionRecord = {
     endDateDay?: number;
     endDateMonth?: number;
     endDateYear?: number;
+    scansPerDay?: number;
+    redeemsPerDay?: number;
     interactions?: PromotionInteractions;
 }
 

@@ -1,14 +1,27 @@
-import { memo, useEffect, useLayoutEffect, useState } from "react"
-import { View, Text, StyleSheet } from "react-native"
-import CustomNavbar from '@/components/navbar'
-import { BackIcon } from "@/assets/icons"
-import { useNavigation, useRouter } from "expo-router"
-import useFetchCafeData from "@/app/hooks/useFetchCafeData"
 import useFetchCafeCards from "@/app/hooks/useFetchCafeCards"
-import { Cafe } from "@/types/User"
-import { collection, doc, DocumentData, onSnapshot } from "firebase/firestore"
-import { getAuth, onAuthStateChanged } from "firebase/auth"
+import useFetchCafeData from "@/app/hooks/useFetchCafeData"
+import useFetchPromotions from "@/app/hooks/useFetchPromotions"
+import { BackIcon } from "@/assets/icons"
+import { PromotionalDataContainer } from "@/components/dashboardcomponents"
+import { HorizontalPicker } from "@/components/horizontalpicker"
+import CustomNavbar from '@/components/navbar'
 import { firestore } from "@/firebaseconfig"
+import { DashboardMenuOption } from "@/types/DashboardMenuOption"
+import { PromotionRecord } from "@/types/Promotion"
+import { Cafe } from "@/types/User"
+import { getSelectedOption } from "@/utils/utils"
+import { useNavigation, useRouter } from "expo-router"
+import { getAuth, onAuthStateChanged } from "firebase/auth"
+import { collection, doc, DocumentData, onSnapshot } from "firebase/firestore"
+import { memo, ReactNode, useEffect, useLayoutEffect, useState } from "react"
+import { StyleSheet, Text, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+const ComponentMap: Record<string, ReactNode> = {
+    'Promotions': <Text>Promotions Rendered</Text>,
+    'Customers': <Text>Promotions Rendered</Text>,
+    'Messaging': <Text>Promotions Rendered</Text>,
+}
 
 const CafeDashboard = () => {
 
@@ -18,10 +31,17 @@ const CafeDashboard = () => {
 
     // states
     const [id, setId] = useState<string>();
-    const [fetchedCafeData, loadingData, errorData] = useFetchCafeData();
-    const [fetchedCardsData, loadingCards, errorCards] = useFetchCafeCards();
+    const [selectedOption, setSelectedOption] = useState<DashboardMenuOption>();
+    const [options, setOptions] = useState<DashboardMenuOption[]>([
+                        {label: 'Promotions', selected: true}, 
+                        {label: 'Customers', selected: false},
+                        {label: 'Messaging', selected: false}]);
+    const [fetchedCafeData, loadingData, errorData] = useFetchCafeData();  // cafe data
+    const [fetchedCardsData, loadingCards, errorCards] = useFetchCafeCards();  // leaderboard data
+    const [fetchedPromotions, loadingPromotions, errorPromotions] = useFetchPromotions();  // promotions data
     const [cafeData, setCafeData] = useState<Cafe | null>(null)
     const [cardsData, setCardsData] = useState<DocumentData>()
+    const [promotionsData, setPromotionsData] = useState<Record<string, PromotionRecord>>();
 
     useLayoutEffect(() => {
 
@@ -67,23 +87,46 @@ const CafeDashboard = () => {
         router.back();
     }
 
+    useEffect(() => {
+        const selecedOption: DashboardMenuOption = getSelectedOption(options);
+        setSelectedOption(selecedOption);
+    }, [options])
+
     return (
-        <View style={styles.container}>
+        <SafeAreaView edges={["top"]} style={styles.container}>
+
             <CustomNavbar
                 leftIcon={<BackIcon height='15' width='25' color='#424C55' />}
                 title="Dashboard"
                 leftOnPress={handleNavBack}
-                height={60} />
-            <Text>Welcome to the cafe dashboard</Text>
+                height={60}
+            />
+            <HorizontalPicker 
+                options={options}
+                setOption={setOptions}
+            />
+            <View style={styles.contentContainer}>
+                {/* <Text>{selectedOption?.label}</Text> */}
+                <PromotionalDataContainer promotions={promotionsData ?? fetchedPromotions} />
+            </View>
+
+            {/* <Text>Welcome to the cafe dashboard</Text>
             <Text>{JSON.stringify(cafeData ?? fetchedCafeData)}</Text>
-            <Text>{JSON.stringify(cardsData ?? fetchedCardsData)}</Text>
-        </View>
+            <Text>{JSON.stringify(cardsData ?? fetchedCardsData)}</Text> */}
+            
+
+        </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'white'
+    },
+    contentContainer: {
+        flex: 1,
+        backgroundColor: '#F8F4F9',
     }
 })
 

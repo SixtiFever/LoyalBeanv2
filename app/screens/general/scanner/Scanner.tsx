@@ -1,6 +1,7 @@
 import { Card } from '@/types/Card';
+import { PromotionRecord } from '@/types/Promotion';
 import { Cafe } from '@/types/User';
-import { addCafeIdToCustomerAccount, checkForCard, createCustomerRecord, fetchData, postNewCard } from '@/utils/FirebaseController';
+import { addCafeIdToCustomerAccount, checkForCard, fetchData, getActivePromotion, postNewCard, updatePromotionInteractions } from '@/utils/FirebaseController';
 import { BeanType, splitPattern } from '@/utils/utils';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
@@ -118,13 +119,15 @@ const ScanCamera = () => {
             alert('Error saving card')
         }
 
+        const activePromotion: PromotionRecord = await getActivePromotion(cafeId);
+        await updatePromotionInteractions(cafeId, activePromotion, customerId, quantity, quantity > cafeData.redeemCount ? 1 : 0 );
         // create a customer record in the cafe doc
-        const isCustomerRecordCreated = await createCustomerRecord(cafeId, customerId, quantity);
-        console.log(isCustomerRecordCreated)
-        if ( !isCustomerRecordCreated ) {
-            console.log('Customer record not created');
-            return;
-        }
+        // const isCustomerRecordCreated = await createCustomerRecord(cafeId, customerId, quantity);
+        // console.log(isCustomerRecordCreated)
+        // if ( !isCustomerRecordCreated ) {
+        //     console.log('Customer record not created');
+        //     return;
+        // }
     }
 
     return (

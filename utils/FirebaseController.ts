@@ -104,6 +104,7 @@ export const fetchCards = async (id: string): Promise<void | DocumentData> => {
         const docRef = doc(colRef, id);
         const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
         if (snap.exists()) {
+            console.log(snap.data());
             return snap.data();
         }
     }).catch(err => {
@@ -158,7 +159,6 @@ export const fetchCustomerCards = async (id: string): Promise<Card[] | void> => 
         let cards: Card[] = []
         for (let i = 0; i < cafeids.length; i++ ) {
             const snap = await transaction.get(doc(colRefCard, cafeids[i]));
-            console.log(snap.data());
             if ( snap.exists() ) {
                 const card: Card = snap.data()[`${id}`]
                 cards.push(card);
@@ -251,15 +251,16 @@ export const updatePromotionInteractions = async (cafeId: string, activePromotio
         const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
         if (!snap.exists()) return;
         const newInteraction: PromotionInteractions = { [userId]: { scans: quantity, redeems: redeems } };
-        if ( !snap.data()[activePromotion.promotionId][userId] ) {
-            transaction.set(docRef, { [activePromotion.promotionId]: newInteraction }, { merge: true })
+        if ( !snap.data()[activePromotion.promotionId]['interactions'][userId] ) {
+            transaction.set(docRef, { [activePromotion.promotionId]: { interactions: newInteraction }}, { merge: true })
         } else {
-            const oldInteraction: PromotionInteractions = snap.data()[activePromotion.promotionId][userId];
-            console.log(newInteraction)
-            console.log(oldInteraction);
-            const newScans = newInteraction[userId].scans + oldInteraction.scans;
-            const newRedeems = newInteraction[userId].redeems + oldInteraction.redeems;
-            transaction.set(docRef, { [activePromotion.promotionId]: { [userId]: { scans: newScans, redeems: newRedeems }}}, {merge: true});
+            const oldInteraction: PromotionInteractions = snap.data()[activePromotion.promotionId]['interactions'][userId];
+            console.log('Old Interaction: ', oldInteraction);
+            const newScans: number = quantity + oldInteraction.scans;
+            const newRedeems: number = redeems + oldInteraction.redeems;
+            console.log(newScans)
+            console.log(newRedeems);
+            transaction.set(docRef, { [activePromotion.promotionId]: { interactions: { [userId]: { scans: newScans, redeems: newRedeems }}}}, {merge: true});
         }
         
     }).catch(err => {

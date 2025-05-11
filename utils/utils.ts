@@ -1,24 +1,38 @@
 // import { Cafe } from "@/types/User"
 // import { ImagePickerResult } from "expo-image-picker";
 
+import { Card } from "@/types/Card";
+import { DashboardMenuOption } from "@/types/DashboardMenuOption";
+import { PromotionRecord } from "@/types/Promotion";
 import { Timestamp } from "firebase/firestore";
 
-// export const isCafeObjectValid = async (cafe: Partial<Cafe>) => {
-//     if (!cafe) return false;
-//     if (Object.keys(cafe).length < 9) return false
-//     for (let prop of Object.values(cafe)) {
-//         if (!prop || prop === undefined) {
-//             return false;
-//         }
-//     }
-//     return true;
-// }
+export function sortCardsByLatestUpdate(cards: Card[]): Card[] {
+    return [...cards].sort((a, b) => {
+        const dateA = a.dateCardUpdated.toMillis(); // or toDate().getTime()
+        const dateB = b.dateCardUpdated.toMillis();
+        return dateB - dateA; // latest first
+    });
+}
+
+export const getSelectedOption = ( options: DashboardMenuOption[] ): DashboardMenuOption => {
+    const selectedOption: DashboardMenuOption[] = options.filter((option) => option.selected === true);
+    return selectedOption[0];
+}
 
 export function extractDayMonthYear(date: Date): { day: number; month: number; year: number } {
     const day = date.getDate();
     const month = date.getMonth() + 1; // getMonth() returns 0-based index
     const year = date.getFullYear();
     return { day, month, year };
+}
+
+export const filterActivePromotion = (promotions: Record<string, PromotionRecord>): PromotionRecord | undefined => {
+    for (const key in promotions) {
+        if ( promotions[key].active ) {
+            return promotions[key]
+        }
+    }
+    return undefined;
 }
 
 export function calculateDaysBetween(timestamp1: Timestamp, timestamp2: Timestamp): number {

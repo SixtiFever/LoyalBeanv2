@@ -5,6 +5,7 @@ import CustomNavbar from '@/components/navbar';
 import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
 import { fetchCustomerCards, getCafeIds } from "@/utils/FirebaseController";
+import { sortCardsByLatestUpdate } from "@/utils/utils";
 import { useNavigation, useRouter } from "expo-router";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { collection, doc, onSnapshot } from "firebase/firestore";
@@ -41,23 +42,13 @@ const YourCards = () => {
 
     useEffect(() => {
 
-        // onAuthStateChanged(getAuth(), (user) => {
-        //     if (user) {
-        //         setUser(user);
-        //         // listener on customers document to add / delete cards bases on cafeid array
-        //         const colRef = collection(firestore, 'customers');
-        //         const docRef = doc(colRef, user.uid);
-        //         onSnapshot(docRef, async (snap) => {
-                    
-        //             setCafeIds(cafeIds);
-        //         })
-
-        //     }
-        // })
         if (!user) { 
             console.log('Can\'t pull user');
             return;
-         }
+        }
+
+        // listener attached to cafeids on customer document
+        // if cafeids changes, new cards are fetched in the below useEffect
         const colRef = collection(firestore, 'customers');
         const docRef = doc(colRef, user.uid);
         const unsubscribe = onSnapshot(docRef, async (snap) => {
@@ -75,12 +66,15 @@ const YourCards = () => {
     useEffect(() => {
 
         // udate cards
-        console.log('Fetching new cards')
+        console.log('Fetching new cards-')
         if ( user && user.uid ) {
             const fetchCards = async () => {
                 const cards: Card[] | void = await fetchCustomerCards(user?.uid);
+                console.log(cards)
                 if (cards) {
-                    setUpdatedCards(cards);
+                    const sortedCards = sortCardsByLatestUpdate(cards)
+                    console.log(sortedCards)
+                    setUpdatedCards(sortedCards);
                 }
             }
             fetchCards();

@@ -1,0 +1,119 @@
+import { BackIcon, RedeemIcon } from '@/assets/icons';
+import { ActionButton } from '@/components/buttons';
+import { CustomTextInput } from '@/components/custominputs';
+import CustomNavbar from '@/components/navbar';
+import NumberPickerLocal from '@/components/NumericInputLocal';
+import { PromotionRecord } from '@/types/Promotion';
+import { calculateDaysBetween, extractDayMonthYear } from '@/utils/utils';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Timestamp } from 'firebase/firestore';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const CreatePromotion = () => {
+
+    const nav = useNavigation();
+    const router = useRouter();
+    const state = useLocalSearchParams();
+
+    // states
+    const [quantity, setQuantity] = useState<number>(0);
+    const [reward, setReward] = useState<string>();
+    const activePromotion = useRef<PromotionRecord>(JSON.parse(state.activePromotion));
+    const archivedPromotion = useRef<PromotionRecord>(JSON.parse(state.activePromotion));
+
+    useLayoutEffect(() => {
+
+        nav.setOptions({
+            headerShown: false,
+        });
+
+        console.log(activePromotion)
+
+    }, [])
+
+    // useEffect(() => {
+
+    // }, [])
+
+    const handleNavBack = () => {
+        router.back();
+    }
+
+    const handleQuantityChange = useCallback((val: number) => {
+            setQuantity(val);
+    }, [])
+
+    const handleChangeText = (type: string, e?: any) => {
+        if ( type === 'reward' ) {
+            setReward(e);
+        }
+    }
+
+    const handleCreatePromotion = () => {
+        const now: Timestamp = Timestamp.now();
+        const { day, month, year } = extractDayMonthYear(now.toDate());
+        archivedPromotion.current.endDate = now;
+        archivedPromotion.current.endDateDay = day;
+        archivedPromotion.current.endDateMonth = month;
+        archivedPromotion.current.endDateYear = year;
+        archivedPromotion.current.endDateFull = now.toDate();
+        archivedPromotion.current.active = false;
+        const startTimestamp: Timestamp = new Timestamp(archivedPromotion.current.startDateTimestamp.seconds,archivedPromotion.current.startDateTimestamp.nanoseconds);
+        const daysRun = calculateDaysBetween(startTimestamp, now);
+        console.log(daysRun)
+        const scansPerDay: number = archivedPromotion.current.scans / daysRun;
+        const redeemsPerDay: number = archivedPromotion.current.redeems / daysRun;
+        archivedPromotion.current.runLengthDays = daysRun;
+        archivedPromotion.current.scansPerDay = scansPerDay;
+        archivedPromotion.current.redeemsPerDay = redeemsPerDay;
+        // console.log('Reward: ' , reward);
+        // console.log('Scans Required: ', quantity);
+        console.log(archivedPromotion.current)
+    }
+
+    return (
+        <SafeAreaView style={styles.container} edges={["top"]}>
+            <CustomNavbar
+                leftIcon={<BackIcon height='15' width='25' color='#424C55' />}
+                title="Launch New Promotion"
+                leftOnPress={handleNavBack}
+                height={60}
+            />
+            <View style={styles.contentArea}>
+                <View style={styles.contentContainer}>
+                    <CustomTextInput
+                        leftIcon={<RedeemIcon width="35" height="25" color="#D2CBCB" />}
+                        height={60} 
+                        widthPercentage={100}
+                        placeholder='Redeemable reward'
+                        type='reward'
+                        handleChangeText={handleChangeText} />
+                    <NumberPickerLocal value={quantity} onChange={handleQuantityChange} min={1} max={30} />
+                    <ActionButton onPress={handleCreatePromotion} title='Create Promotion' color={'cyan'} />
+                </View>
+            </View>
+        </SafeAreaView>
+    )
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    contentArea: {
+        flex: 1,
+        backgroundColor: '#F8F4F9',
+        padding: 10,
+    },
+    contentContainer: {
+        height: '100%',
+        width: '100%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        rowGap: 25,
+    }
+})
+
+export default CreatePromotion;

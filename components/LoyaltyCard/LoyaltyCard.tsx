@@ -54,6 +54,22 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
         })
     }
 
+    if ( error && !isLoading ) {
+        return (
+            <View>
+                <Text>Error encountered</Text>
+            </View>
+        )
+    }
+
+    if ( isLoading && !error ) {
+        return (
+            <View>
+                <Text>Loading</Text>
+            </View>
+        )
+    }
+
     if ( cardData && card ) {
         return (
             <View style={styles.container}>

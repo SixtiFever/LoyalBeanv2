@@ -1,6 +1,7 @@
 import { Card } from "@/types/Card";
 import { getUid } from "@/utils/FirebaseAuthentication";
 import { fetchCustomerCards } from "@/utils/FirebaseController";
+import { sortCardsByLatestUpdate } from "@/utils/utils";
 import { useEffect, useState } from "react";
 
 
@@ -26,7 +27,8 @@ const useFetchCards = (): Card => {
                 setError(true);
                 return;
             }
-            setCards(cards ?? [])
+            const sortedCards = sortCardsByLatestUpdate(cards);
+            setCards(sortedCards ?? [])
         } catch (err) {
 
             setError(true);

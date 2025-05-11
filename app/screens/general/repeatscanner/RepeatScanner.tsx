@@ -85,7 +85,6 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
             console.log(err);
         });
         const activePromotion: PromotionRecord = await getActivePromotion(cid);
-        console.log(activePromotion);
         await updatePromotionInteractions(cid, activePromotion, uid, quantity, scanCount > redeemCount ? 1 : 0 );
        
     }
