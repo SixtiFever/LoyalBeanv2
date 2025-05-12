@@ -149,7 +149,7 @@ export const fetchCustomerCards = async (id: string): Promise<Card[] | void> => 
         const colRefCard = collection(firestore, 'cards');
 
         const customerSnap = await transaction.get(docRefUser);
-        console.log(customerSnap.data());
+
         if ( !customerSnap.exists() ) {
             console.log('Customer snap doesn\'t exist');
             return;
@@ -210,6 +210,7 @@ export const createPromotionRecord = (cafeObject: Partial<Cafe>): PromotionRecor
         return false;
     }
     const id: string = uuidv4()
+    const startDate = Timestamp.now().toDate();
     const { day, month, year } = extractDayMonthYear(Timestamp.now().toDate());
     const promotion: PromotionRecord = { 
         promotionId: id,
@@ -219,10 +220,11 @@ export const createPromotionRecord = (cafeObject: Partial<Cafe>): PromotionRecor
         scans: 0,
         redeems: 0,
         startDateTimestamp: Timestamp.now(),
-        startDateFull: Timestamp.now().toDate(),
+        startDateFull: startDate,
         startDateDay: day,
         startDateMonth: month,
         startDateYear: year,
+        interactions: {}
     }
     return promotion;
 }
@@ -301,3 +303,27 @@ export const getCafeIds = async (user: User): Promise<string[] | undefined> => {
 }
 
 
+
+export const updateActivePromotion = async (cid: string, oldPromotion: PromotionRecord, newPromotion: PromotionRecord) => {
+    console.log(cid);
+    const result = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, 'promotions');
+        const docRef = doc(colRef, cid);
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
+        if (!snap.exists()) return;
+        const promotions: Record<string, PromotionRecord> = snap.data();
+        // blankey loop to turn assign all .active as false
+        for ( let key in promotions ) {
+            if ( promotions[key].active ) {
+                promotions[key].active = false;
+            }
+        }
+        delete promotions[oldPromotion.promotionId];
+        promotions[oldPromotion.promotionId] = oldPromotion;
+        promotions[newPromotion.promotionId] = newPromotion;
+        console.log(promotions)
+        transaction.set(docRef, promotions);
+    }).catch(err => {
+        console.log(err);
+    })
+}

@@ -4,12 +4,15 @@ import { CustomTextInput } from '@/components/custominputs';
 import CustomNavbar from '@/components/navbar';
 import NumberPickerLocal from '@/components/NumericInputLocal';
 import { PromotionRecord } from '@/types/Promotion';
+import { updateActivePromotion } from '@/utils/FirebaseController';
 import { calculateDaysBetween, extractDayMonthYear } from '@/utils/utils';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { v4 as uuidv4 } from 'uuid';
 
 const CreatePromotion = () => {
 
@@ -20,7 +23,8 @@ const CreatePromotion = () => {
     // states
     const [quantity, setQuantity] = useState<number>(0);
     const [reward, setReward] = useState<string>();
-    const activePromotion = useRef<PromotionRecord>(JSON.parse(state.activePromotion));
+    const [user, setUser] = useState<User>()
+    const activePromotion = useRef<PromotionRecord>({});
     const archivedPromotion = useRef<PromotionRecord>(JSON.parse(state.activePromotion));
 
     useLayoutEffect(() => {
@@ -29,7 +33,11 @@ const CreatePromotion = () => {
             headerShown: false,
         });
 
-        console.log(activePromotion)
+        const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+            if (user) setUser(user)
+        })
+
+        return () => unsubscribe();
 
     }, [])
 
@@ -51,9 +59,16 @@ const CreatePromotion = () => {
         }
     }
 
-    const handleCreatePromotion = () => {
+    const handleCreatePromotion = async () => {
+        if ( !reward || quantity < 1 ) {
+            alert('Enter valid reward / quantity')
+            return;
+        }
+        if ( !user ) return;
+        console.log(archivedPromotion)
         const now: Timestamp = Timestamp.now();
         const { day, month, year } = extractDayMonthYear(now.toDate());
+        archivedPromotion.current = { ...archivedPromotion.current };
         archivedPromotion.current.endDate = now;
         archivedPromotion.current.endDateDay = day;
         archivedPromotion.current.endDateMonth = month;
@@ -62,15 +77,30 @@ const CreatePromotion = () => {
         archivedPromotion.current.active = false;
         const startTimestamp: Timestamp = new Timestamp(archivedPromotion.current.startDateTimestamp.seconds,archivedPromotion.current.startDateTimestamp.nanoseconds);
         const daysRun = calculateDaysBetween(startTimestamp, now);
-        console.log(daysRun)
-        const scansPerDay: number = archivedPromotion.current.scans / daysRun;
-        const redeemsPerDay: number = archivedPromotion.current.redeems / daysRun;
+        const scansPerDay: number = daysRun >= 1 ? archivedPromotion.current.scans / daysRun : archivedPromotion.current.scans;
+        const redeemsPerDay: number = daysRun >= 1 ? archivedPromotion.current.redeems / daysRun : archivedPromotion.current.redeems;
         archivedPromotion.current.runLengthDays = daysRun;
         archivedPromotion.current.scansPerDay = scansPerDay;
         archivedPromotion.current.redeemsPerDay = redeemsPerDay;
-        // console.log('Reward: ' , reward);
-        // console.log('Scans Required: ', quantity);
-        console.log(archivedPromotion.current)
+
+        
+        const id: string = uuidv4()
+        const promotion: PromotionRecord = { 
+            promotionId: id,
+            active: true,
+            purchaseMilestone: quantity,
+            reward: reward,
+            scans: 0,
+            redeems: 0,
+            startDateTimestamp: now,
+            startDateFull: now.toDate(),
+            startDateDay: day,
+            startDateMonth: month,
+            startDateYear: year,
+        }
+        activePromotion.current = promotion;
+        console.log(user)
+        await updateActivePromotion(user?.uid, archivedPromotion.current, activePromotion.current);
     }
 
     return (

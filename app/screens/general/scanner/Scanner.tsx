@@ -108,7 +108,7 @@ const ScanCamera = () => {
             beanIconUri: '',
         }
 
-        // past card to cards
+        // post card to cards
         const isCardSaved: boolean = await postNewCard(cafeId, user?.uid, card);
         if ( isCardSaved ) {
 
