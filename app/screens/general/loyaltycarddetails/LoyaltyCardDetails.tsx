@@ -39,18 +39,14 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
         router.navigate({
             pathname: '/screens/general/repeatscanner/RepeatScanner',
             params: { 
-                currentCount: card.currentCount,
-                redeemCount: card.countRequiredRedeem,
+                currentCount: card?.currentCount,
+                redeemCount: card?.countRequiredRedeem,
                 cafeId: cid,
                 userId: uid }
         })
     }
 
     if (error && !isLoading) {
-        console.log(state)
-        console.log(card)
-        console.log(isLoading)
-        console.log(error)
         return (
             <View>
                 <Text>Error</Text>
@@ -67,12 +63,17 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
     }
 
     if ( fetchedCard || card) {
-
+        console.log(card?.pendingRedeems ?? fetchedCard?.pendingRedeems)
         return (
             <View style={styles.container}>
                 <Text>{ card?.reward ?? fetchedCard?.reward }</Text>
                 <Text>{card?.currentCount ?? fetchedCard?.currentCount}</Text>
                 <Text>{card?.countRequiredRedeem ?? fetchedCard?.countRequiredRedeem}</Text>
+                { Object.entries(card?.pendingRedeems ?? fetchedCard?.pendingRedeems).map((redeem) => {
+                    return (
+                        <Text key={redeem[0]}>{redeem[1]?.reward}</Text>
+                    )
+                })}
                 <ActionButton onPress={handleNavScanner} title="Scan" color={'pink'} />
             </View>
         )

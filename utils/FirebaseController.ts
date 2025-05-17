@@ -38,7 +38,7 @@ export const postNewUserId = async (user: UserCredential) => {
 export const postNewCafe = async (cafe: Partial<Cafe>) => {
     const colRef = collection(firestore, 'cafes');
     const docRef = doc(colRef, cafe.id);
-    console.log(cafe)
+
     try {
         await setDoc(docRef, cafe);
     } catch (err) {
@@ -87,7 +87,6 @@ export const fetchData = async (id: string, type: 'cafes' | 'customers'): Promis
         const colRef = collection(firestore, type);
         const docRef = doc(colRef, id);
         const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
-        console.log(snap.data());
         if ( !snap.exists() ) {
             return false;
         }
@@ -104,7 +103,6 @@ export const fetchCards = async (id: string): Promise<void | DocumentData> => {
         const docRef = doc(colRef, id);
         const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
         if (snap.exists()) {
-            console.log(snap.data());
             return snap.data();
         }
     }).catch(err => {
@@ -253,6 +251,7 @@ export const updatePromotionInteractions = async (cafeId: string, activePromotio
         const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
         if (!snap.exists()) return;
         const newInteraction: PromotionInteractions = { [userId]: { scans: quantity, redeems: redeems } };
+        console.log('New interaction: ', newInteraction)
         if ( !snap.data()[activePromotion.promotionId]['interactions'][userId] ) {
             transaction.set(docRef, { [activePromotion.promotionId]: { interactions: newInteraction }}, { merge: true })
         } else {
@@ -266,7 +265,7 @@ export const updatePromotionInteractions = async (cafeId: string, activePromotio
         }
         
     }).catch(err => {
-        console.log(err);
+        console.log('FirebaseController/269 - ', err);
     })
 }
 
@@ -321,9 +320,47 @@ export const updateActivePromotion = async (cid: string, oldPromotion: Promotion
         delete promotions[oldPromotion.promotionId];
         promotions[oldPromotion.promotionId] = oldPromotion;
         promotions[newPromotion.promotionId] = newPromotion;
-        console.log(promotions)
         transaction.set(docRef, promotions);
     }).catch(err => {
         console.log(err);
     })
 }
+
+
+export const updateCardsWithNewPromotion = async (cafeId: string, newPromotion: PromotionRecord): Promise<Record<string, Card> | void> => {
+    const result: Record<string, Card> | void = await runTransaction(firestore, async (transaction) => {
+        const colRef = collection(firestore, 'cards');
+        const docRef = doc(colRef, cafeId);
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef); // retrieve customer cards
+
+        if ( !snap.exists() ) return;
+
+        const cards: Record<string, Card> = snap.data(); // locally assign card for manipulation
+        for ( let key in cards ) {
+            cards[key].countRequiredRedeem = newPromotion.purchaseMilestone;
+            cards[key].reward = newPromotion.reward;
+        }
+        transaction.set(docRef, cards); // update document with new cards
+        return cards;
+    }).catch(err => {
+        console.log(err)
+    })
+    return result;
+}
+
+/**
+ * fetches all prootions from the cafes promotions document
+ * both active and non-active
+*/
+// export const fetchAllCafePromotions = async (cafeId: string): Promise<Record<string, PromotionRecord> | void> => {
+//     try {
+//         const colRef = collection(firestore, 'promotions');
+//         const docRef = doc(colRef, cafeId);
+//         const snap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+//         if ( !snap.exists() ) return;
+//         const promotions: Record<string, PromotionRecord> = snap.data();
+//         return promotions;
+//     } catch(err) {
+//         console.log(err)
+//     }
+// }

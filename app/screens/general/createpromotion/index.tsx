@@ -4,7 +4,7 @@ import { CustomTextInput } from '@/components/custominputs';
 import CustomNavbar from '@/components/navbar';
 import NumberPickerLocal from '@/components/NumericInputLocal';
 import { PromotionRecord } from '@/types/Promotion';
-import { updateActivePromotion } from '@/utils/FirebaseController';
+import { updateActivePromotion, updateCardsWithNewPromotion } from '@/utils/FirebaseController';
 import { calculateDaysBetween, extractDayMonthYear } from '@/utils/utils';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
@@ -26,6 +26,8 @@ const CreatePromotion = () => {
     const [user, setUser] = useState<User>()
     const activePromotion = useRef<PromotionRecord>({});
     const archivedPromotion = useRef<PromotionRecord>(JSON.parse(state.activePromotion));
+    // const [promotions, setPromotions] = useState<Record<string, PromotionRecord>>({})
+    // const [error, setError] = useState<boolean>(false);
 
     useLayoutEffect(() => {
 
@@ -42,7 +44,15 @@ const CreatePromotion = () => {
     }, [])
 
     // useEffect(() => {
-
+    //     const fetchPromotions = async () => {
+    //         if (!user) return;
+    //         const promotions: Record<string, PromotionRecord> | void = await fetchAllCafePromotions(user?.uid);
+    //         if (promotions) {
+    //             setPromotions(promotions);
+    //         } else {
+    //             setError(true);
+    //         }
+    //     }
     // }, [])
 
     const handleNavBack = () => {
@@ -60,47 +70,59 @@ const CreatePromotion = () => {
     }
 
     const handleCreatePromotion = async () => {
-        if ( !reward || quantity < 1 ) {
-            alert('Enter valid reward / quantity')
-            return;
-        }
-        if ( !user ) return;
-        console.log(archivedPromotion)
-        const now: Timestamp = Timestamp.now();
-        const { day, month, year } = extractDayMonthYear(now.toDate());
-        archivedPromotion.current = { ...archivedPromotion.current };
-        archivedPromotion.current.endDate = now;
-        archivedPromotion.current.endDateDay = day;
-        archivedPromotion.current.endDateMonth = month;
-        archivedPromotion.current.endDateYear = year;
-        archivedPromotion.current.endDateFull = now.toDate();
-        archivedPromotion.current.active = false;
-        const startTimestamp: Timestamp = new Timestamp(archivedPromotion.current.startDateTimestamp.seconds,archivedPromotion.current.startDateTimestamp.nanoseconds);
-        const daysRun = calculateDaysBetween(startTimestamp, now);
-        const scansPerDay: number = daysRun >= 1 ? archivedPromotion.current.scans / daysRun : archivedPromotion.current.scans;
-        const redeemsPerDay: number = daysRun >= 1 ? archivedPromotion.current.redeems / daysRun : archivedPromotion.current.redeems;
-        archivedPromotion.current.runLengthDays = daysRun;
-        archivedPromotion.current.scansPerDay = scansPerDay;
-        archivedPromotion.current.redeemsPerDay = redeemsPerDay;
+        try {
+            if ( !reward || quantity < 1 ) {
+                alert('Enter valid reward / quantity')
+                return;
+            }
+            if ( !user ) {
+                console.log('No user object');
+                return;
+            }
+            const now: Timestamp = Timestamp.now();
+            const { day, month, year } = extractDayMonthYear(now.toDate());
+            archivedPromotion.current = { ...archivedPromotion.current };
+            archivedPromotion.current.endDate = now;
+            archivedPromotion.current.endDateDay = day;
+            archivedPromotion.current.endDateMonth = month;
+            archivedPromotion.current.endDateYear = year;
+            archivedPromotion.current.endDateFull = now.toDate();
+            archivedPromotion.current.active = false;
+            const startTimestamp: Timestamp = new Timestamp(archivedPromotion.current.startDateTimestamp.seconds,archivedPromotion.current.startDateTimestamp.nanoseconds);
+            const daysRun = calculateDaysBetween(startTimestamp, now);
+            const scansPerDay: number = daysRun >= 1 ? archivedPromotion.current.scans / daysRun : archivedPromotion.current.scans;
+            const redeemsPerDay: number = daysRun >= 1 ? archivedPromotion.current.redeems / daysRun : archivedPromotion.current.redeems;
+            archivedPromotion.current.runLengthDays = daysRun;
+            archivedPromotion.current.scansPerDay = scansPerDay;
+            archivedPromotion.current.redeemsPerDay = redeemsPerDay;
 
-        
-        const id: string = uuidv4()
-        const promotion: PromotionRecord = { 
-            promotionId: id,
-            active: true,
-            purchaseMilestone: quantity,
-            reward: reward,
-            scans: 0,
-            redeems: 0,
-            startDateTimestamp: now,
-            startDateFull: now.toDate(),
-            startDateDay: day,
-            startDateMonth: month,
-            startDateYear: year,
+            
+            const id: string = uuidv4()
+            const promotion: PromotionRecord = { 
+                promotionId: id,
+                active: true,
+                purchaseMilestone: quantity,
+                reward: reward,
+                scans: 0,
+                redeems: 0,
+                startDateTimestamp: now,
+                startDateFull: now.toDate(),
+                startDateDay: day,
+                startDateMonth: month,
+                startDateYear: year,
+                interactions: {}
+            }
+            activePromotion.current = promotion;
+
+            // set active === true on new promotion
+            await updateActivePromotion(user?.uid, archivedPromotion.current, activePromotion.current);
+            
+            // update all customer cards with new promotion details (purchase milestone, reward)
+            await updateCardsWithNewPromotion(user.uid, promotion);
+
+        } catch (err) {
+            console.log(err);
         }
-        activePromotion.current = promotion;
-        console.log(user)
-        await updateActivePromotion(user?.uid, archivedPromotion.current, activePromotion.current);
     }
 
     return (

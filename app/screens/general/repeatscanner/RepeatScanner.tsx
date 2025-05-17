@@ -6,9 +6,11 @@ import { splitPattern } from "@/utils/utils"
 import { BarcodeScanningResult, CameraView } from "expo-camera"
 import { useLocalSearchParams } from "expo-router"
 import { getAuth, onAuthStateChanged, User } from "firebase/auth"
-import { collection, doc, DocumentData, DocumentSnapshot, runTransaction, setDoc, Timestamp } from "firebase/firestore"
+import { collection, doc, DocumentData, DocumentSnapshot, runTransaction, Timestamp } from "firebase/firestore"
 import { useLayoutEffect, useRef, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import 'react-native-get-random-values'
+import { v4 as uuidv4 } from 'uuid'
 
 interface CardScannerProps {
     currentCount?: number;
@@ -38,6 +40,7 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
     const handleBarcodeScanned = (scanResult: BarcodeScanningResult) => {
         if ( !isScanned.current ) {
             const scanData = scanResult.data;
+            console.log(scanData);
             const [cafeId, quantity]: string[] = scanData.split(splitPattern);
             if (parseInt(quantity) < 1) {
                 console.log('Invalid coffee count ( < 1 )');
@@ -53,10 +56,13 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
         // calculate new scan count
         const scanCount: number = quantity + currentCount;
         const newScanCount: number = scanCount > redeemCount ? (scanCount % redeemCount) - 1 : scanCount;
-        
+        console.log('scanCount: ', scanCount)
+        console.log('quantity: ', quantity)
         // update customers card for the cafe
         const result: void | Card = await runTransaction(firestore, async (transaction) => {
+
             const activePromotion: PromotionRecord = await getActivePromotion(cid);
+
             const colRef = collection(firestore, 'cards');
             const docRef = doc(colRef, cid);
             const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
@@ -64,7 +70,9 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 console.log('Doc ' + cid + ' doesn\'t exist');
                 return;
             }
+
             const card: Card = await snap.data()[uid] as Card;
+
             if ( !card ) {
                 console.log('Can\'t find customers loyalty card');
                 return;
@@ -74,15 +82,25 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 console.log('Couldn\'t find promotion');
                 return;
             }
+            
             card.currentCount = newScanCount;
             card.totalRedeemCount = scanCount > card.countRequiredRedeem ? card.totalRedeemCount + 1 : card.totalRedeemCount;
             card.dateCardUpdated = Timestamp.now();
             card.totalScanCount += quantity;
-            console.log(card)
-            setDoc(docRef, {[uid]: card}, {merge: true}).catch(err => console.log(err));
+
+            if ( scanCount > card.countRequiredRedeem ) {
+
+                const quantityOfRedeems = Math.floor(scanCount / card.countRequiredRedeem)
+                console.log('Redeem quant: ', quantityOfRedeems)
+                for ( let i = 0; i < quantityOfRedeems; i++ ) {
+                    const randomId: string = uuidv4();
+                    card.pendingRedeems[`${uid}-${randomId}`] = { reward: activePromotion.reward };
+                }
+            }
+            transaction.set(docRef, {[uid]: card}, {merge: true})
             return card
         }).catch(err => {
-            console.log(err);
+            console.log('RepeatScanner/102 - ', err);
         });
         const activePromotion: PromotionRecord = await getActivePromotion(cid);
         await updatePromotionInteractions(cid, activePromotion, uid, quantity, scanCount > redeemCount ? 1 : 0 );

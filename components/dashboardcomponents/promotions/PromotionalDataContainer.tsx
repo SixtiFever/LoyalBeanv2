@@ -3,7 +3,7 @@ import { PromotionRecord } from "@/types/Promotion";
 import { filterActivePromotion } from "@/utils/utils";
 import { useNavigation, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 interface PromotionalDataContainerProps {
     promotions: Record<string, PromotionRecord> | boolean;
@@ -24,6 +24,7 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
 
         const promotion = filterActivePromotion(promotions);
         setActivePromotion(promotion);
+        setAllPromotions(promotions);
 
     }, [promotions])
 
@@ -57,7 +58,16 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
             </View>
             <View style={styles.previousPromotionSection}>
                 <View style={styles.previousPromotionContainer}>
-
+                    <FlatList 
+                        data={Object.values(allPromotions)}
+                        keyExtractor={(item) => item.promotionId}
+                        renderItem={({item}) => (
+                            <View>
+                                <Text>{item.reward}</Text>
+                                <Text>{item.promotionId} | Scans: {item.scans} | Active: {String(item.active)}</Text>
+                                <Text>##########</Text>
+                            </View>
+                        )} />
                 </View>
             </View>
         </View>
