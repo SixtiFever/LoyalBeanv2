@@ -26,6 +26,7 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
     const uid: string = state.userId as string;
     const currentCount: number = Number(state.currentCount);
     const redeemCount: number = Number(state.redeemCount);
+    const redeemCountIncrease = useRef<number>(0)
     const isScanned = useRef<boolean>(false);  // scan once controller
 
     useLayoutEffect(() => {
@@ -55,7 +56,7 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
     const updateCard = async (quantity: number, currentCount: number, redeemCount: number) => {
         // calculate new scan count
         const scanCount: number = quantity + currentCount;
-        const newScanCount: number = scanCount > redeemCount ? (scanCount % redeemCount) - 1 : scanCount;
+        const newScanCount: number = scanCount > redeemCount ? (scanCount % redeemCount) : scanCount;
         console.log('scanCount: ', scanCount)
         console.log('quantity: ', quantity)
         // update customers card for the cafe
@@ -84,13 +85,15 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
             }
             
             card.currentCount = newScanCount;
-            card.totalRedeemCount = scanCount > card.countRequiredRedeem ? card.totalRedeemCount + 1 : card.totalRedeemCount;
+            //card.totalRedeemCount = scanCount > card.countRequiredRedeem ? card.totalRedeemCount + 1 : card.totalRedeemCount;
             card.dateCardUpdated = Timestamp.now();
             card.totalScanCount += quantity;
 
             if ( scanCount > card.countRequiredRedeem ) {
 
                 const quantityOfRedeems = Math.floor(scanCount / card.countRequiredRedeem)
+                card.totalRedeemCount += quantityOfRedeems;
+                redeemCountIncrease.current = quantityOfRedeems
                 console.log('Redeem quant: ', quantityOfRedeems)
                 for ( let i = 0; i < quantityOfRedeems; i++ ) {
                     const randomId: string = uuidv4();
@@ -103,7 +106,7 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
             console.log('RepeatScanner/102 - ', err);
         });
         const activePromotion: PromotionRecord = await getActivePromotion(cid);
-        await updatePromotionInteractions(cid, activePromotion, uid, quantity, scanCount > redeemCount ? 1 : 0 );
+        await updatePromotionInteractions(cid, activePromotion, uid, quantity, redeemCountIncrease.current );
        
     }
 

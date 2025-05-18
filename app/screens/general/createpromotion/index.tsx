@@ -1,3 +1,4 @@
+import useFetchPromotions from '@/app/hooks/useFetchPromotions';
 import { BackIcon, RedeemIcon } from '@/assets/icons';
 import { ActionButton } from '@/components/buttons';
 import { CustomTextInput } from '@/components/custominputs';
@@ -5,11 +6,11 @@ import CustomNavbar from '@/components/navbar';
 import NumberPickerLocal from '@/components/NumericInputLocal';
 import { PromotionRecord } from '@/types/Promotion';
 import { updateActivePromotion, updateCardsWithNewPromotion } from '@/utils/FirebaseController';
-import { calculateDaysBetween, extractDayMonthYear } from '@/utils/utils';
+import { calculateDaysBetween, calculatePerDayStat, extractDayMonthYear } from '@/utils/utils';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,6 +26,7 @@ const CreatePromotion = () => {
     const [reward, setReward] = useState<string>();
     const [user, setUser] = useState<User>()
     const activePromotion = useRef<PromotionRecord>({});
+    const [promotions, isLoading, error] = useFetchPromotions();
     const archivedPromotion = useRef<PromotionRecord>(JSON.parse(state.activePromotion));
     // const [promotions, setPromotions] = useState<Record<string, PromotionRecord>>({})
     // const [error, setError] = useState<boolean>(false);
@@ -43,17 +45,16 @@ const CreatePromotion = () => {
 
     }, [])
 
-    // useEffect(() => {
-    //     const fetchPromotions = async () => {
-    //         if (!user) return;
-    //         const promotions: Record<string, PromotionRecord> | void = await fetchAllCafePromotions(user?.uid);
-    //         if (promotions) {
-    //             setPromotions(promotions);
-    //         } else {
-    //             setError(true);
-    //         }
-    //     }
-    // }, [])
+    useEffect(() => {
+
+        if ( typeof promotions === 'boolean' ) return;
+
+        for ( let key in promotions) {
+            if ( promotions[key].active ) archivedPromotion.current = promotions[key]
+        }
+
+    }, [promotions])
+
 
     const handleNavBack = () => {
         router.back();
@@ -90,13 +91,15 @@ const CreatePromotion = () => {
             archivedPromotion.current.active = false;
             const startTimestamp: Timestamp = new Timestamp(archivedPromotion.current.startDateTimestamp.seconds,archivedPromotion.current.startDateTimestamp.nanoseconds);
             const daysRun = calculateDaysBetween(startTimestamp, now);
-            const scansPerDay: number = daysRun >= 1 ? archivedPromotion.current.scans / daysRun : archivedPromotion.current.scans;
-            const redeemsPerDay: number = daysRun >= 1 ? archivedPromotion.current.redeems / daysRun : archivedPromotion.current.redeems;
+            const perDayStats: {scansPerDay: number, redeemsPerDay: number} | void = calculatePerDayStat(archivedPromotion.current, daysRun);
+            if ( !perDayStats ) {
+                alert('Couldn\'t calculate per day stats');
+                return;
+            }
             archivedPromotion.current.runLengthDays = daysRun;
-            archivedPromotion.current.scansPerDay = scansPerDay;
-            archivedPromotion.current.redeemsPerDay = redeemsPerDay;
+            archivedPromotion.current.scansPerDay = perDayStats.scansPerDay;
+            archivedPromotion.current.redeemsPerDay = perDayStats.redeemsPerDay;
 
-            
             const id: string = uuidv4()
             const promotion: PromotionRecord = { 
                 promotionId: id,

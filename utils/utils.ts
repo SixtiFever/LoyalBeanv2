@@ -3,7 +3,7 @@
 
 import { Card } from "@/types/Card";
 import { DashboardMenuOption } from "@/types/DashboardMenuOption";
-import { PromotionRecord } from "@/types/Promotion";
+import { PromotionInteractions, PromotionRecord } from "@/types/Promotion";
 import { Timestamp } from "firebase/firestore";
 
 export function sortCardsByLatestUpdate(cards: Card[]): Card[] {
@@ -42,7 +42,21 @@ export function calculateDaysBetween(timestamp1: Timestamp, timestamp2: Timestam
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
     const diffInMillis = Math.abs(date2.getTime() - date1.getTime());
     
-    return Math.floor(diffInMillis / millisecondsPerDay);
+    return Math.floor(diffInMillis / millisecondsPerDay) <= 0 ? 1 : Math.floor(diffInMillis / millisecondsPerDay);
+  }
+
+  export function calculatePerDayStat(promotion: PromotionRecord, daysRun: number): void | {scansPerDay: number, redeemsPerDay: number} {
+    if ( !promotion.interactions ) return;
+    let scans: number = 0;
+    let redeems: number = 0;
+    const interactions: PromotionInteractions = promotion.interactions;
+    for (let key in interactions) {
+        scans += interactions[key].scans;
+        redeems += interactions[key].redeems;
+    }
+    scans  /= daysRun;
+    redeems /= daysRun;
+    return {scansPerDay: scans, redeemsPerDay: redeems}
   }
 
 export const splitPattern: string = '-%-%-';
