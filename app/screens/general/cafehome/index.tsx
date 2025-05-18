@@ -54,7 +54,11 @@ const CafeHome = () => {
         router.navigate('/screens/general/cafedashboard')
     }
 
-    console.log(qrdata)
+    const handleNavRedeemScanner = () => {
+        router.navigate({
+            pathname: '/screens/general/redeemscanner',
+        })
+    }
     
     return (
         <SafeAreaView edges={["top"]} style={styles.container}>
@@ -76,6 +80,7 @@ const CafeHome = () => {
                     <View style={styles.bottomCanvas}>
                         <NumberPickerLocal value={quantity} onChange={handleQuantityChange} min={1} max={30} />
                         <ActionButton onPress={handleGenerateCode} title="Generate QR Code" color={'yellow'} />
+                        <ActionButton onPress={handleNavRedeemScanner} title="Active Redeem" color={'blue'} />
                     </View>
                 </View>
         </SafeAreaView>

@@ -94,7 +94,7 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 console.log('Redeem quant: ', quantityOfRedeems)
                 for ( let i = 0; i < quantityOfRedeems; i++ ) {
                     const randomId: string = uuidv4();
-                    card.pendingRedeems[`${uid}-${randomId}`] = { reward: activePromotion.reward };
+                    card.pendingRedeems[`${uid}${splitPattern}${randomId}`] = { reward: activePromotion.reward };
                 }
             }
             transaction.set(docRef, {[uid]: card}, {merge: true})

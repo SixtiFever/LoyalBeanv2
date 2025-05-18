@@ -1,5 +1,5 @@
 import { firestore } from "@/firebaseconfig";
-import { Card } from "@/types/Card";
+import { Card, PromotionRedeem } from "@/types/Card";
 import { CustomerRecord } from "@/types/CustomerRecord";
 import { PromotionInteractions, PromotionRecord } from "@/types/Promotion";
 import { Cafe, Customer } from "@/types/User";
@@ -346,6 +346,38 @@ export const updateCardsWithNewPromotion = async (cafeId: string, newPromotion: 
         console.log(err)
     })
     return result;
+}
+
+
+export const resolvePromotionRedeem = async (cafeId: string, customerId: string, promotionId: string) => {
+    const result = runTransaction(firestore, async (transaction) => {
+
+        const colRef = collection(firestore, 'cards');
+        const docRef = doc(colRef, cafeId);
+        // const fieldPath: string = `${customerId}.pendingRedeems.[${promotionId}]`;
+        const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
+        if (!snap.exists()) return;
+        // extract redeemed promotion from pendingRedeems
+        const pendingRedeems: Record<string, PromotionRedeem> = snap.data()[customerId].pendingRedeems;
+        const redeemedPromotion = pendingRedeems[promotionId];
+        if (!redeemedPromotion) {
+            throw new Error('Promotion ID not found in pendingRedeems');
+        }
+        // add redeemed promotion to archivedRedeems
+        const archivedRedeems: Record<string, PromotionRedeem> = snap.data()[customerId].archivedRedeems;
+        archivedRedeems[promotionId] = redeemedPromotion;
+
+        // delete redeemed promotion from pendingRedeems
+        delete pendingRedeems[promotionId];
+
+        transaction.update(docRef, { 
+            [`${customerId}.pendingRedeems`]: pendingRedeems,
+            [`${customerId}.archivedRedeems`]: archivedRedeems
+         })
+
+        return redeemedPromotion;
+    })
+    
 }
 
 /**
