@@ -1,8 +1,9 @@
 import { PlusIcon } from "@/assets/icons";
+import { SortPicker } from "@/components/sortpicker";
 import { PromotionRecord } from "@/types/Promotion";
 import { filterActivePromotion } from "@/utils/utils";
 import { useNavigation, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 
 interface PromotionalDataContainerProps {
@@ -17,6 +18,7 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
     // states
     const [activePromotion, setActivePromotion] = useState<PromotionRecord>();
     const [allPromotions, setAllPromotions] = useState<Record<string, PromotionRecord>>({});
+    const [sortKey, setSortKey] = useState<'active' | 'runLengthDays' | 'scansPerDay' | 'redeemsPerDay'>('active');  // active promotion first
 
     useEffect(() => {
 
@@ -36,6 +38,26 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
         })
     }
 
+    const sortedPromotions = useMemo(() => {
+        const promotions = Object.values(allPromotions);
+
+        return promotions.sort((a, b) => {
+            switch (sortKey) {
+                case 'active':
+                    return Number(b.active) - Number(a.active); // true > false
+                case 'runLengthDays':
+                    return (b.runLengthDays || 0) - (a.runLengthDays || 0);
+                case 'scansPerDay':
+                    return (b.scansPerDay || 0) - (a.scansPerDay || 0);
+                case 'redeemsPerDay':
+                    return (b.redeemsPerDay || 0) - (a.redeemsPerDay || 0);
+                default:
+                    return 0;
+            }
+        });
+    }, [allPromotions, sortKey]);
+
+
     if (!promotions) {
         return (
             <View>
@@ -53,18 +75,20 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
                         <PlusIcon onPress={handleNavCreateNew} width="20" height="20" />
                     </View>
                     { activePromotion && <Text>{JSON.stringify(activePromotion.reward)}</Text> }
-                    
                 </View>
             </View>
             <View style={styles.previousPromotionSection}>
                 <View style={styles.previousPromotionContainer}>
+                    <SortPicker selectedValue={sortKey} onValueChange={setSortKey} />
                     <FlatList 
-                        data={Object.values(allPromotions)}
+                        data={sortedPromotions}
                         keyExtractor={(item) => item.promotionId}
                         renderItem={({item}) => (
                             <View>
-                                <Text>{item.reward}</Text>
-                                <Text>{item.promotionId} | Scans: {item.scans} | Active: {String(item.active)}</Text>
+                                <Text>Reward: {item.reward}</Text>
+                                <Text>Active Status: {item.active ? 'True' : 'False'}</Text>
+                                <Text>Days Run {item.runLengthDays}</Text>
+                                <Text>Daily Scans: {item.scansPerDay ?? 'In Progress'} | Daily Redeems: {item.redeemsPerDay ?? 'In Progress'}</Text>
                                 <Text>##########</Text>
                             </View>
                         )} />
