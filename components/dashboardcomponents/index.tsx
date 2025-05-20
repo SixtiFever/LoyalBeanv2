@@ -1,3 +1,4 @@
+import CustomersDataContainer from "./customers/CustomersDataContainer";
 import PromotionalDataContainer from "./promotions/PromotionalDataContainer";
 
-export { PromotionalDataContainer };
+export { CustomersDataContainer, PromotionalDataContainer };

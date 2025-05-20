@@ -3,6 +3,7 @@ import { fetchCards } from "@/utils/FirebaseController";
 import { useEffect, useState } from "react";
 
 const useFetchCafeCards = () => {
+    
     const [cards, setCards] = useState<any>()
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<boolean>(false)

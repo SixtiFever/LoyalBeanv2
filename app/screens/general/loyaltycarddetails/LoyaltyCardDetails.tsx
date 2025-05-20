@@ -115,8 +115,7 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
                 <View style={styles.pendingRedeemsContainer}>
                     <Text>Pending Redeems</Text>
                     <FlatList
-                        style={styles.flatList}
-                        data={Object.entries(card?.pendingRedeems ?? fetchedCard?.pendingRedeems)}
+                        data={Object.entries(card?.pendingRedeems ?? fetchedCard?.pendingRedeems ?? {})}
                         keyExtractor={([key]) => key}
                         renderItem={({ item: [key, redeem] }) => (
                             <View style={styles.pendingRedeemsItemContainer} key={key}>

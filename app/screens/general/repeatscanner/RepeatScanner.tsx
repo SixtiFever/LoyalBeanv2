@@ -83,6 +83,9 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 console.log('Couldn\'t find promotion');
                 return;
             }
+            if (!card.pendingRedeems) {
+                card.pendingRedeems = {};
+            }
             
             card.currentCount = newScanCount;
             //card.totalRedeemCount = scanCount > card.countRequiredRedeem ? card.totalRedeemCount + 1 : card.totalRedeemCount;
@@ -93,12 +96,14 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
 
                 const quantityOfRedeems = Math.floor(scanCount / card.countRequiredRedeem)
                 card.totalRedeemCount += quantityOfRedeems;
-                redeemCountIncrease.current = quantityOfRedeems
+                redeemCountIncrease.current = quantityOfRedeems;
+                card.currentCount = newScanCount % card.countRequiredRedeem
                 console.log('Redeem quant: ', quantityOfRedeems)
                 for ( let i = 0; i < quantityOfRedeems; i++ ) {
                     const randomId: string = uuidv4();
                     card.pendingRedeems[`${uid}${splitPattern}${randomId}`] = { reward: activePromotion.reward };
                 }
+
             }
             transaction.set(docRef, {[uid]: card}, {merge: true})
             return card

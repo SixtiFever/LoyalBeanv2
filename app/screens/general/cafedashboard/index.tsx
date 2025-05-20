@@ -2,7 +2,7 @@ import useFetchCafeCards from "@/app/hooks/useFetchCafeCards"
 import useFetchCafeData from "@/app/hooks/useFetchCafeData"
 import useFetchPromotions from "@/app/hooks/useFetchPromotions"
 import { BackIcon } from "@/assets/icons"
-import { PromotionalDataContainer } from "@/components/dashboardcomponents"
+import { CustomersDataContainer, PromotionalDataContainer } from "@/components/dashboardcomponents"
 import { HorizontalPicker } from "@/components/horizontalpicker"
 import CustomNavbar from '@/components/navbar'
 import { firestore } from "@/firebaseconfig"
@@ -20,7 +20,6 @@ import { SafeAreaView } from "react-native-safe-area-context"
 const ComponentMap: Record<string, ReactNode> = {
     'Promotions': <Text>Promotions Rendered</Text>,
     'Customers': <Text>Promotions Rendered</Text>,
-    'Messaging': <Text>Promotions Rendered</Text>,
 }
 
 const CafeDashboard = () => {
@@ -34,8 +33,7 @@ const CafeDashboard = () => {
     const [selectedOption, setSelectedOption] = useState<DashboardMenuOption>();
     const [options, setOptions] = useState<DashboardMenuOption[]>([
                         {label: 'Promotions', selected: true}, 
-                        {label: 'Customers', selected: false},
-                        {label: 'Messaging', selected: false}]);
+                        {label: 'Customers', selected: false}]);
     const [fetchedCafeData, loadingData, errorData] = useFetchCafeData();  // cafe data
     const [fetchedCardsData, loadingCards, errorCards] = useFetchCafeCards();  // leaderboard data
     const [fetchedPromotions, loadingPromotions, errorPromotions] = useFetchPromotions();  // promotions data
@@ -90,7 +88,10 @@ const CafeDashboard = () => {
     useEffect(() => {
         const selecedOption: DashboardMenuOption = getSelectedOption(options);
         setSelectedOption(selecedOption);
+        console.log(selectedOption)
     }, [options])
+
+    
 
     return (
         <SafeAreaView edges={["top"]} style={styles.container}>
@@ -107,13 +108,12 @@ const CafeDashboard = () => {
             />
             <View style={styles.contentContainer}>
                 {/* <Text>{selectedOption?.label}</Text> */}
-                <PromotionalDataContainer promotions={promotionsData ?? fetchedPromotions} />
+                { 
+                    selectedOption?.label === 'Promotions' && selectedOption.selected === true ?
+                    <PromotionalDataContainer promotions={promotionsData ?? fetchedPromotions} /> : 
+                    <CustomersDataContainer /> }
+                
             </View>
-
-            {/* <Text>Welcome to the cafe dashboard</Text>
-            <Text>{JSON.stringify(cafeData ?? fetchedCafeData)}</Text>
-            <Text>{JSON.stringify(cardsData ?? fetchedCardsData)}</Text> */}
-            
 
         </SafeAreaView>
     )

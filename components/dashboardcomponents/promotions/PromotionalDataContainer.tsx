@@ -1,4 +1,5 @@
 import { PlusIcon } from "@/assets/icons";
+import { PromotionCard } from "@/components/promotioncard";
 import { SortPicker } from "@/components/sortpicker";
 import { PromotionRecord } from "@/types/Promotion";
 import { filterActivePromotion } from "@/utils/utils";
@@ -81,16 +82,12 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
                 <View style={styles.previousPromotionContainer}>
                     <SortPicker selectedValue={sortKey} onValueChange={setSortKey} />
                     <FlatList 
+                        style={{paddingTop: 10}}
+                        ItemSeparatorComponent={() => <View style={{height: 10,}} />}
                         data={sortedPromotions}
                         keyExtractor={(item) => item.promotionId}
                         renderItem={({item}) => (
-                            <View>
-                                <Text>Reward: {item.reward}</Text>
-                                <Text>Active Status: {item.active ? 'True' : 'False'}</Text>
-                                <Text>Days Run {item.runLengthDays}</Text>
-                                <Text>Daily Scans: {item.scansPerDay ?? 'In Progress'} | Daily Redeems: {item.redeemsPerDay ?? 'In Progress'}</Text>
-                                <Text>##########</Text>
-                            </View>
+                            <PromotionCard data={item} />
                         )} />
                 </View>
             </View>
@@ -105,7 +102,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     activePromotionSection: {
-        height: '40%',
+        height: '30%',
         width: '100%',
         borderBottomWidth: .1,
         padding: 10,

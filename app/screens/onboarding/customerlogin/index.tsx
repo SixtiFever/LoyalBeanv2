@@ -8,6 +8,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { getAuth, UserCredential } from 'firebase/auth';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Dimensions, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface LoginProps {
     type?: string;
@@ -76,7 +77,7 @@ const Login: React.FC<LoginProps> = memo(({ type }) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
-    <View style={styles.container}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
         <View style={styles.topContainer}>
             <CustomNavbar
                     height={80}
@@ -114,7 +115,7 @@ const Login: React.FC<LoginProps> = memo(({ type }) => {
                 <Text style={styles.signupText}>Don't have an account? Sign up</Text>
             </TouchableOpacity>
         </View>
-    </View>
+    </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 });
