@@ -19,7 +19,6 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
                 <Text>{data.totalScanCount}</Text>
                 <Text>{data.totalRedeemCount}</Text>
             </View>
-            
         </View>
     )
 }
