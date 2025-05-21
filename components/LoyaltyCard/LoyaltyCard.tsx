@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { User } from "firebase/auth";
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import { memo, useEffect, useState } from "react";
-import { Button, Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface CardProps {
     user: User;
@@ -83,10 +83,15 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
                     </View>
                     <Text style={styles.cafeName}>{cardData.cafeName ?? 'Cafe Name Goes Here'}</Text>
                 </View>
-                <Text>{cardData.currentCount ?? card?.currentCount} out of {cardData.countRequiredRedeem ?? card.countRequiredRedeem}</Text>
-                {/* <Text>{cardData.cafeId}</Text> */}
-                {/* <Text>{cardData.dateCardUpdated.toDate().toDateString()}</Text> */}
-                <Button onPress={handleNav} title="View Card" />
+                <View style={styles.middleContainer}>
+                    <Text>{cardData.currentCount ?? card?.currentCount} out of {cardData.countRequiredRedeem ?? card.countRequiredRedeem}</Text>
+                </View>
+                <View style={styles.lowerContainer}>
+                    <TouchableOpacity onPress={handleNav}>
+                        <Text style={styles.touchableText}>View Card</Text>
+                    </TouchableOpacity>
+                </View>
+                
             </View>
         )
     }
@@ -121,14 +126,30 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         height: 40,
-        width: 50,
+        width: 40,
         justifyContent:'center',
         alignItems: 'center',
     },
     cafeName: {
-        paddingLeft: 10,
-        fontSize: 14,
-        fontWeight: '400',
+        paddingLeft: 15,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    middleContainer: {
+        flex: 3,
+        display: 'flex',
+        justifyContent: 'center',
+        padding: 5,
+    },
+    lowerContainer: {
+        flex: 1,
+        display: 'flex',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+    },
+    touchableText: {
+        fontWeight: 'bold',
+        fontSize: 12,
     }
 })
 
