@@ -122,13 +122,16 @@ const YourCards = () => {
                 <SafeAreaView edges={["top"]} style={styles.container}>
 
                     <CustomNavbar
+                        hasBottomBorder={true}
                         height={60}
                         leftIcon={<SettingsIcon width="25" height="25" />}
                         title="Your Cards"
                         fontWeight="300"
                         fontSize={16}
                         rightIcon={<PlusIcon width="25" height="25" onPress={handleNavNewCardScanner} />} />
-                        <FlatList 
+                        <View style={styles.flatListContainer}>
+                            <FlatList 
+                            ItemSeparatorComponent={() => <View style={{ height: 25 }} />}
                             renderItem={({ item }) => 
                                 <LoyaltyCard 
                                     user={user} 
@@ -137,6 +140,8 @@ const YourCards = () => {
                                 }
                                 
                             data={updatedCards ?? cards} />
+                        </View>
+                        
                         
                 </SafeAreaView>
             )
@@ -151,8 +156,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
     },
-    scrollView: {
-        backgroundColor: 'blue',
+    flatListContainer: {
+        flex: 1,
+        width: '100%',
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        backgroundColor: '#F8F4F9',
     }
 })
 

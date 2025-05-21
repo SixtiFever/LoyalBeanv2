@@ -89,7 +89,7 @@ const ScanCamera = () => {
             console.log('Authentication error');
             return;
         }
-        // generate cafe card for customer
+        // generate loyalty card for customer from the cafe document
         const cafeData: Cafe = await fetchData(cafeId, 'cafes') as Cafe;
         const card: Card = {
             userId: user?.uid,
@@ -103,9 +103,10 @@ const ScanCamera = () => {
             ranking: 0,
             dateCardCreated: Timestamp.now(),
             dateCardUpdated: Timestamp.now(),
-            logoUri: '',
+            logoUri: cafeData.logo,
             beanType: BeanType['Green Bean'],
             beanIconUri: '',
+            cafeName: cafeData.shopname,
         }
 
         // post card to cards

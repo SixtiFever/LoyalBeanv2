@@ -11,14 +11,26 @@ interface CustomNavbarProps extends ButtonProps {
     color?: string;
     fontWeight?: string;
     fontSize?: number;
+    hasBottomBorder?: boolean;
 }
 
 const CustomNavbar: React.FC<CustomNavbarProps> = ({
-    height, leftIcon, title, rightIcon, leftOnPress, rightOnPress, color, fontWeight, fontSize }) => {
+    height, leftIcon, title, rightIcon, leftOnPress, rightOnPress, color, fontWeight, fontSize, hasBottomBorder }) => {
 
+
+        const bottomBorder = {
+            borderBottomWidth: .3,
+            borderBottomColor: 'rgba(0,0,0,0.3)',
+        }
 
     return (
-        <View style={[styles.container, { height: height, backgroundColor: `${color ?? 'white'}` }]}>
+        <View style={
+            [
+                styles.container, 
+                { height: height, backgroundColor: `${color ?? 'white'}`},
+                hasBottomBorder ? bottomBorder : '',
+            ]
+            }>
             
             <TouchableOpacity onPress={leftOnPress} style={styles.leftContainer}>
                 {leftIcon}

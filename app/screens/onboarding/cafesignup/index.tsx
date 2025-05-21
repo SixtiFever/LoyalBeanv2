@@ -8,7 +8,7 @@ import { auth } from '@/firebaseconfig';
 import { Geolocations } from '@/types/Geolocations';
 import { PromotionRecord } from '@/types/Promotion';
 import { Cafe } from '@/types/User';
-import { activateFirstPromotion, createCardsDocument, createPromotionRecord, postNewCafe, postNewCafeId } from '@/utils/FirebaseController';
+import { activateFirstPromotion, createCardsDocument, createPromotionRecord, postNewCafe, postNewCafeId, uploadCafeLogo } from '@/utils/FirebaseController';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useNavigation } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -44,9 +44,7 @@ const CafeSignup = () => {
 
 
     const handleSignup = async () => {
-        console.log(cafe)
-        console.log(confirmEmail)
-        console.log(confirmPassword)
+
         if ( confirmEmail !== cafe.email || confirmPassword !== cafe.password ) return;
 
         try {
@@ -56,7 +54,7 @@ const CafeSignup = () => {
                 ...cafe, 
                 id: result.user.uid, 
                 qrCode: result.user.uid, 
-                logo: '', 
+                logo: logoUri, 
                 redeemCount: quantity, 
                 locations: geolocations,
                 customers: [],
@@ -65,7 +63,8 @@ const CafeSignup = () => {
             await postNewCafe(cafeObject);  // add document to cafes collection
             await createCardsDocument(result.user.uid); // create card in cards collection
             await postNewCafeId(cafeObject); // store id in cafeids collection
-            // create promotion
+            // storage cafe logo 
+            await uploadCafeLogo(cafeObject);
             const promotion: PromotionRecord | false = createPromotionRecord(cafeObject);
             if (!promotion) {
                 console.log('Promotion can\'t be created');

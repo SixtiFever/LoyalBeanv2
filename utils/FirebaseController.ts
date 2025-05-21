@@ -1,10 +1,11 @@
-import { firestore } from "@/firebaseconfig";
+import { firestore, storage } from "@/firebaseconfig";
 import { Card, PromotionRedeem } from "@/types/Card";
 import { CustomerRecord } from "@/types/CustomerRecord";
 import { PromotionInteractions, PromotionRecord } from "@/types/Promotion";
 import { Cafe, Customer } from "@/types/User";
 import { User, UserCredential } from "firebase/auth";
 import { collection, doc, DocumentData, DocumentSnapshot, getDoc, runTransaction, setDoc, Timestamp } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 import { extractDayMonthYear } from "./utils";
 
@@ -133,7 +134,7 @@ export const postNewCard = async (cafeId: string, customerId: string | undefined
         await setDoc(docRef, { [customerId as string]: card }, {merge: true});
         return true;
     } catch (err) {
-        console.log(err);
+        console.log('FirebaseController/postNewCard: ', err);
     }
     return false;
 }
@@ -157,8 +158,10 @@ export const fetchCustomerCards = async (id: string): Promise<Card[] | void> => 
         let cards: Card[] = []
         for (let i = 0; i < cafeids.length; i++ ) {
             const snap = await transaction.get(doc(colRefCard, cafeids[i]));
+            const logo = await fetchCafeLogo(cafeids[i]);
             if ( snap.exists() ) {
                 const card: Card = snap.data()[`${id}`]
+                card.logoUri = logo;
                 cards.push(card);
             }
             
@@ -378,6 +381,32 @@ export const resolvePromotionRedeem = async (cafeId: string, customerId: string,
         return redeemedPromotion;
     })
     
+}
+
+export const uploadCafeLogo = async (cafeData: Partial<Cafe>) => {
+    console.log('Reached upload cafe logo')
+    try {
+        const filename = `${cafeData.id}/logo.png`;
+        const response = await fetch(cafeData.logo)
+        const blob = await response.blob();
+        const storageRef = ref(storage, filename);
+        const result = await uploadBytesResumable(storageRef, blob);
+        console.log(result);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+
+export const fetchCafeLogo = async (cafeId: string) => {
+    try {
+        const fileName: string = `${cafeId}/logo.png`;
+        const imageRef = ref(storage, fileName);
+        const url = await getDownloadURL(imageRef);
+        return url;
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 /**

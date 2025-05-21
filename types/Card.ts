@@ -16,7 +16,9 @@ export type Card = {
     logoUri: string;
     beanType: BeanType;
     beanIconUri: string;
-    pendingRedeems: PromotionRedeem;
+    pendingRedeems?: PromotionRedeem;
+    cafeName: string;
+    archivedRedeems?: PromotionRedeem;
 }
 
 export type PromotionRedeem = Record<string, {reward: string}>
