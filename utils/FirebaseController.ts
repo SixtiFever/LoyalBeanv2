@@ -195,7 +195,7 @@ export const createCustomerRecord = async (cafeId: string, customerId: string, x
         if ( !snap.exists() ) return false;
         // assign customer record from cafe doc. If not found, create one.
         const record: CustomerRecord = {[customerId] : { scans: 0, redeems: 0 }};
-        console.log(record);
+
         record[customerId].scans += x
         transaction.set(docRef, { 'customers': record }, {merge: true});
         return record;
@@ -254,16 +254,14 @@ export const updatePromotionInteractions = async (cafeId: string, activePromotio
         const snap: DocumentSnapshot<DocumentData> = await transaction.get(docRef);
         if (!snap.exists()) return;
         const newInteraction: PromotionInteractions = { [userId]: { scans: quantity, redeems: redeems } };
-        console.log('New interaction: ', newInteraction)
+
         if ( !snap.data()[activePromotion.promotionId]['interactions'][userId] ) {
             transaction.set(docRef, { [activePromotion.promotionId]: { interactions: newInteraction }}, { merge: true })
         } else {
             const oldInteraction: PromotionInteractions = snap.data()[activePromotion.promotionId]['interactions'][userId];
-            console.log('Old Interaction: ', oldInteraction);
+
             const newScans: number = quantity + oldInteraction.scans;
             const newRedeems: number = redeems + oldInteraction.redeems;
-            console.log(newScans)
-            console.log(newRedeems);
             transaction.set(docRef, { [activePromotion.promotionId]: { interactions: { [userId]: { scans: newScans, redeems: newRedeems }}}}, {merge: true});
         }
         
@@ -287,7 +285,6 @@ export const getActivePromotion = async (cafeId: string) => {
         if(!activeKey) return;
 
         const activePromotion = promotions[activeKey]
-        console.log(activePromotion)
         return activePromotion;
     } catch (err) {
         console.log(err);
@@ -307,7 +304,7 @@ export const getCafeIds = async (user: User): Promise<string[] | undefined> => {
 
 
 export const updateActivePromotion = async (cid: string, oldPromotion: PromotionRecord, newPromotion: PromotionRecord) => {
-    console.log(cid);
+
     const result = await runTransaction(firestore, async (transaction) => {
         const colRef = collection(firestore, 'promotions');
         const docRef = doc(colRef, cid);
@@ -384,14 +381,14 @@ export const resolvePromotionRedeem = async (cafeId: string, customerId: string,
 }
 
 export const uploadCafeLogo = async (cafeData: Partial<Cafe>) => {
-    console.log('Reached upload cafe logo')
+
     try {
         const filename = `${cafeData.id}/logo.png`;
         const response = await fetch(cafeData.logo)
         const blob = await response.blob();
         const storageRef = ref(storage, filename);
         const result = await uploadBytesResumable(storageRef, blob);
-        console.log(result);
+
     } catch (err) {
         console.log(err);
     }

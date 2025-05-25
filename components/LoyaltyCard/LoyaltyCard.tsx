@@ -1,6 +1,8 @@
 import useFetchCard from "@/app/hooks/useFetchCard";
+import { BeanIcon, ScannerIcon, TrophyIcon } from "@/assets/icons";
 import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
+import { BeanType } from "@/utils/utils";
 import { useRouter } from "expo-router";
 import { User } from "firebase/auth";
 import { collection, doc, onSnapshot } from "firebase/firestore";
@@ -73,26 +75,39 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
     if ( cardData && card ) {
         console.log(cardData?.logoUri)
         return (
-            <View style={styles.container}>
-                <View style={styles.logoTitleContainer}>
-                    <View style={styles.logoContainer}>
-                        <Image 
-                            source={{uri: cardData.logoUri ?? card?.logoUri ?? ''}}
-                            style={{ height: '100%', width: '100%' }}
-                            resizeMode="contain" />
+            <TouchableOpacity style={styles.container} onPress={handleNav}>
+                <View style={styles.detailsContainer}>
+                    <View style={styles.cafeNameContainer}>
+                        <Text style={styles.cafeName}>{cardData.cafeName ?? 'Cafe Name Goes Here'}</Text>
                     </View>
-                    <Text style={styles.cafeName}>{cardData.cafeName ?? 'Cafe Name Goes Here'}</Text>
+                    <View style={styles.rewardContainer}>
+                        {/* <StarIcon height="25" width="25" /> */}
+                        <Text style={styles.labelText}>{cardData.reward ?? 'Reward goes here'}</Text>
+                    </View>
+                    <View style={styles.statsContainer}>
+                        <View style={styles.rewardContainer}>
+                            <ScannerIcon height="24" width="24" />
+                            <Text style={styles.labelText}>{cardData.currentCount ?? '999'}</Text>
+                        </View>
+                        <View style={[styles.rewardContainer, {paddingStart: 30}]}>
+                            <TrophyIcon height="24" width="24" />
+                            <Text style={styles.labelText}>{cardData.countRequiredRedeem ?? '999'}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.rewardContainer}>
+                        <BeanIcon height="24" width="24" />
+                        <Text style={styles.labelText}>{ BeanType[cardData.beanType] ?? 'Status not available'}</Text>
+                    </View>
                 </View>
-                <View style={styles.middleContainer}>
-                    <Text>{cardData.currentCount ?? card?.currentCount} out of {cardData.countRequiredRedeem ?? card.countRequiredRedeem}</Text>
+                <View style={styles.logoContainer}>
+
+                    <Image 
+                        source={{uri: cardData.logoUri ?? card?.logoUri ?? ''}}
+                        style={{ height: '50%', width: '50%' }}
+                        resizeMode="contain" />
+
                 </View>
-                <View style={styles.lowerContainer}>
-                    <TouchableOpacity onPress={handleNav}>
-                        <Text style={styles.touchableText}>View Card</Text>
-                    </TouchableOpacity>
-                </View>
-                
-            </View>
+            </TouchableOpacity>
         )
     }
 }
@@ -102,11 +117,12 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 150,
         display: 'flex',
+        flexDirection: 'row',
         backgroundColor: 'white',
-        justifyContent: 'space-evenly',
+        // justifyContent: 'space-evenly',
         borderRadius: 10,
         padding: 10,
-
+        justifyContent: 'space-between',
         // iOS shadow
         shadowColor: 'rgba(100, 100, 100, .2)',
         shadowOffset: { width: 2, height: 2 },
@@ -125,31 +141,45 @@ const styles = StyleSheet.create({
 
     },
     logoContainer: {
-        height: 40,
-        width: 40,
+        // height: 40,
+        // width: 40,
         justifyContent:'center',
-        alignItems: 'center',
+        alignItems: 'flex-end',
+        flex: 1,
     },
     cafeName: {
-        paddingLeft: 15,
+        // paddingLeft: 15,
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '400',
+        paddingStart: 6,
     },
-    middleContainer: {
-        flex: 3,
+    detailsContainer: {
+        height: '100%',
+        width: 'auto',
+        maxWidth: '60%',
         display: 'flex',
-        justifyContent: 'center',
-        padding: 5,
+        flexDirection: 'column',
     },
-    lowerContainer: {
+    cafeNameContainer: {
+        width: '100%',
+        display: 'flex',
         flex: 1,
-        display: 'flex',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
     },
-    touchableText: {
-        fontWeight: 'bold',
-        fontSize: 12,
+    rewardContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    labelText: {
+        fontSize: 13,
+        fontWeight: '400',
+        paddingLeft: 6,
+    },
+    statsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        flex: 1,
     }
 })
 

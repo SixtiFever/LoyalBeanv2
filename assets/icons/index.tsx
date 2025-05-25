@@ -1,22 +1,23 @@
-import PadlockIcon from "./Padlock";
+import BackIcon from "./BackIcon";
+import BeanIcon from "./BeanIcon";
+import DashboardIcon from "./DashboardIcon";
 import EmailIcon from "./EmaiIcon";
 import LoyalBeanLogo from "./LoyalBeanLogo";
-import BackIcon from "./BackIcon";
-import UserIcon from "./UserIcon";
-import ShopIconFilled from "./ShopIconFilled";
-import RedeemIcon from "./RedeemIcon";
-import SettingsIcon from "./SettingsIcon";
+import PadlockIcon from "./Padlock";
 import PlusIcon from "./PlusIcon";
-import DashboardIcon from "./DashboardIcon";
+import RedeemIcon from "./RedeemIcon";
+import ScannerIcon from "./ScannerIcon";
+import SettingsIcon from "./SettingsIcon";
+import ShopIconFilled from "./ShopIconFilled";
+import StarIcon from "./StarIcon";
+import TrophyIcon from "./TrophyIcon";
+import UserIcon from "./UserIcon";
 
-export { 
-    PadlockIcon, 
-    EmailIcon, 
-    LoyalBeanLogo, 
-    BackIcon, 
-    UserIcon,
-    ShopIconFilled,
-    RedeemIcon,
-    SettingsIcon,
-    PlusIcon,
-    DashboardIcon }
+export {
+    BackIcon, BeanIcon, DashboardIcon, EmailIcon,
+    LoyalBeanLogo, PadlockIcon, PlusIcon,
+    RedeemIcon, ScannerIcon, SettingsIcon,
+    ShopIconFilled, StarIcon, TrophyIcon,
+    UserIcon
+};
+
