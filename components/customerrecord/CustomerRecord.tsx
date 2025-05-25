@@ -1,23 +1,41 @@
 import { Card } from "@/types/Card";
 import { BeanType } from "@/utils/utils";
-import React, { memo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import React, { memo, useLayoutEffect, useState } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
 
 interface CustomerRecordProps {
     data: Card;
 }
 
+const deafultIcon = require('../../assets/images/defaultusericon.jpg');
+
 const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
-    console.log(data)
+
+    const [user, setUser] = useState<User>()
+    const [totalScanCount, setTotalScanCount] = useState(0);
+    const [totalRedeemCount, setTotalRedeemCount] = useState(0);
+
+    useLayoutEffect(() => {
+
+        onAuthStateChanged(getAuth(), (user) => {
+            if (user) setUser(user);
+        })
+
+    }, [])
+
     return (
         <View style={styles.container}>
-            <View style={styles.topContainer}>
-                <Text>{data.userEmail}</Text>
+            <View style={styles.leftSideContainer}>
+                <Image source={deafultIcon} style={styles.image} />
                 <Text>{BeanType[data.beanType]}</Text>
             </View>
-            <View style={styles.bottomContainer}>
-                <Text>{data.totalScanCount}</Text>
-                <Text>{data.totalRedeemCount}</Text>
+            <View style={styles.rightSideContainer}>
+                <Text>{user?.displayName}</Text>
+                <Text>{data.userEmail}</Text>
+                <Text>Scans: {data.totalScanCount}</Text>
+                <Text>Redeems: {data.totalRedeemCount}</Text>
+                {/* <Text>Fav: {data.userEmail}</Text> */}
             </View>
         </View>
     )
@@ -26,24 +44,34 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: 80,
+        height: 100,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         borderRadius: 8,
-        justifyContent:'space-between',
+        // justifyContent:'space-between',
         borderWidth: 0.2,
         borderColor: 'rgba(0,0,0,0.3)',
         padding: 10,
     },
-    topContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    bottomContainer: {
+    leftSideContainer: {
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        width: '25%',
+        alignItems: 'center'
+    },
+    rightSideContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        paddingStart: 35,
+        justifyContent: 'space-evenly',
+    },
+    image: {
+        height: 60,
+        width: 60,
+        borderColor: 'rgba(0,0,0,0.2)',
+        borderWidth: 1,
+        borderRadius: '100%',
     }
 })
 

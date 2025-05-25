@@ -66,14 +66,13 @@ const YourCards = () => {
     useEffect(() => {
 
         // udate cards
-        console.log('Fetching new cards-')
+        // console.log('Fetching new cards-')
         if ( user && user.uid ) {
             const fetchCards = async () => {
                 const cards: Card[] | void = await fetchCustomerCards(user?.uid);
-                console.log(cards)
                 if (cards) {
                     const sortedCards = sortCardsByLatestUpdate(cards)
-                    console.log(sortedCards)
+
                     setUpdatedCards(sortedCards);
                 }
             }
@@ -117,7 +116,7 @@ const YourCards = () => {
         }
 
         if ( cards && user ) {
-            console.log('Here are your cards: ', cards)
+            // console.log('Here are your cards: ', cards)
             return (
                 <SafeAreaView edges={["top"]} style={styles.container}>
 
@@ -131,15 +130,16 @@ const YourCards = () => {
                         rightIcon={<PlusIcon width="25" height="25" onPress={handleNavNewCardScanner} />} />
                         <View style={styles.flatListContainer}>
                             <FlatList 
-                            ItemSeparatorComponent={() => <View style={{ height: 25 }} />}
-                            renderItem={({ item }) => 
-                                <LoyaltyCard 
-                                    user={user} 
-                                    cafeId={item.cafeId} 
-                                    data={item} />
-                                }
+                                ItemSeparatorComponent={() => <View style={{ height: 25 }} />}
+                                keyExtractor={(item) => item.cafeId}
+                                renderItem={({ item }) => 
+                                    <LoyaltyCard 
+                                        user={user} 
+                                        cafeId={item.cafeId} 
+                                        data={item} />
+                                    }
                                 
-                            data={updatedCards ?? cards} />
+                                data={updatedCards ?? cards} />
                         </View>
                         
                         

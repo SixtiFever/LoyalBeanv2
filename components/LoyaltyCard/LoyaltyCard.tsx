@@ -73,7 +73,6 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
     }
 
     if ( cardData && card ) {
-        console.log(cardData?.logoUri)
         return (
             <TouchableOpacity style={styles.container} onPress={handleNav}>
                 <View style={styles.detailsContainer}>
