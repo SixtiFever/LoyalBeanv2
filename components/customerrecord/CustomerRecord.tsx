@@ -1,5 +1,4 @@
 import { Card } from "@/types/Card";
-import { BeanType } from "@/utils/utils";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import React, { memo, useLayoutEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
@@ -28,7 +27,7 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
         <View style={styles.container}>
             <View style={styles.leftSideContainer}>
                 <Image source={deafultIcon} style={styles.image} />
-                <Text>{BeanType[data.beanType]}</Text>
+                <Text>{data.beanType}</Text>
             </View>
             <View style={styles.rightSideContainer}>
                 <Text>{user?.displayName}</Text>
@@ -56,7 +55,7 @@ const styles = StyleSheet.create({
     leftSideContainer: {
         display: 'flex',
         flexDirection: 'column',
-        width: '25%',
+        width: '30%',
         alignItems: 'center'
     },
     rightSideContainer: {

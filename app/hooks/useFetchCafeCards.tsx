@@ -1,3 +1,4 @@
+import { Card } from "@/types/Card";
 import { getUid } from "@/utils/FirebaseAuthentication";
 import { fetchCards } from "@/utils/FirebaseController";
 import { useEffect, useState } from "react";
@@ -9,7 +10,6 @@ const useFetchCafeCards = () => {
     const [error, setError] = useState<boolean>(false)
     
     const getCards = async () => {
-
         setIsLoading(true);
 
         try {
@@ -20,7 +20,7 @@ const useFetchCafeCards = () => {
                 return;
             }
 
-            const cards = await fetchCards(id);
+            const cards: Record<string, Card> = await fetchCards(id);
             if ( !cards ) {
                 setError(true);
                 return;

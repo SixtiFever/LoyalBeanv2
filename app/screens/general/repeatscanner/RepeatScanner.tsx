@@ -2,7 +2,7 @@ import { firestore } from "@/firebaseconfig"
 import { Card } from "@/types/Card"
 import { PromotionRecord } from "@/types/Promotion"
 import { getActivePromotion, updatePromotionInteractions } from "@/utils/FirebaseController"
-import { splitPattern } from "@/utils/utils"
+import { splitPattern, updateBeanStatuses } from "@/utils/utils"
 import { BarcodeScanningResult, CameraView } from "expo-camera"
 import { useLocalSearchParams } from "expo-router"
 import { getAuth, onAuthStateChanged, User } from "firebase/auth"
@@ -105,7 +105,12 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 }
 
             }
-            transaction.set(docRef, {[uid]: card}, {merge: true})
+            let newCards: Record<string, Card> = snap.data();
+            newCards[uid] = card;
+            const updatedCards = updateBeanStatuses(newCards);
+            console.log('reached');
+            transaction.set(docRef, updatedCards);
+            console.log('reached 2')
             return card
         }).catch(err => {
             console.log('RepeatScanner/102 - ', err);
