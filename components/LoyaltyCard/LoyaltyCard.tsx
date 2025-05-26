@@ -2,7 +2,6 @@ import useFetchCard from "@/app/hooks/useFetchCard";
 import { BeanIcon, ScannerIcon, TrophyIcon } from "@/assets/icons";
 import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
-import { BeanType } from "@/utils/utils";
 import { useRouter } from "expo-router";
 import { User } from "firebase/auth";
 import { collection, doc, onSnapshot } from "firebase/firestore";
@@ -95,7 +94,7 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
                     </View>
                     <View style={styles.rewardContainer}>
                         <BeanIcon height="24" width="24" />
-                        <Text style={styles.labelText}>{ BeanType[cardData.beanType] ?? 'Status not available'}</Text>
+                        <Text style={styles.labelText}>{ cardData.beanType ?? 'Status not available'}</Text>
                     </View>
                 </View>
                 <View style={styles.logoContainer}>

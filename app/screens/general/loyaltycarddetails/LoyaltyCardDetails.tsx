@@ -1,11 +1,13 @@
 import useFetchCard from "@/app/hooks/useFetchCard"
+import { BackIcon } from "@/assets/icons"
 import { ActionButton } from "@/components/buttons"
+import CustomNavbar from '@/components/navbar'
 import { firestore } from "@/firebaseconfig"
 import { Card } from "@/types/Card"
 import { splitPattern } from "@/utils/utils"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 import { collection, doc, onSnapshot } from "firebase/firestore"
-import { memo, useEffect, useRef, useState } from "react"
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import QRCode from "react-native-qrcode-svg"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -17,15 +19,27 @@ interface LoyaltyCardProps {
 
 const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
 
+    // navigation
+    const nav = useNavigation();
+    const router = useRouter();
     const state = useLocalSearchParams();
+
+    // states
     const uid: string = state.userId as string
     const cid: string = state.cafeId as string
-    const router = useRouter();
     const [fetchedCard, isLoading, error] = useFetchCard(state.userId as string, state.cafeId as string);
     const [card, setCard] = useState<Card>()
     const [redeemClaim, setRedeemClaim] = useState<{key: string, redeem: string}>()
     const customerId = useRef<string>('')
     const [modalVisible, setModalVisible] = useState(false);
+
+    useLayoutEffect(() => {
+
+        nav.setOptions({
+            headerShown: false,
+        })
+
+    }, [])
 
     useEffect(() => {
 
@@ -59,6 +73,10 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
         setModalVisible(true);
     }
 
+    const handleNavBack = () => {
+        router.back();
+    }
+
     if (error && !isLoading) {
         return (
             <View>
@@ -79,6 +97,14 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
 
         return (
             <SafeAreaView edges={["top"]} style={styles.container}>
+                <CustomNavbar
+                        height={60}
+                        fontWeight="300"
+                        fontSize={16}
+                        hasBottomBorder={true}
+                        leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
+                        leftOnPress={handleNavBack}
+                        title='Card Details' />
 
                 { redeemClaim &&  
                     <Modal 
@@ -106,35 +132,35 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
                     </Modal>
                 }
                 
-                <View style={styles.cardDetailsCotnainer}>
-                    <Text>Reward: { card?.reward ?? fetchedCard?.reward }</Text>
-                    <Text>Current: {card?.currentCount ?? fetchedCard?.currentCount}</Text>
-                    <Text>Required: {card?.countRequiredRedeem ?? fetchedCard?.countRequiredRedeem}</Text>
+                <View style={styles.cardDetailsContainer}>
+                    <View style={styles.cardDetailsContent}>
+                        <Text>Reward: { card?.reward ?? fetchedCard?.reward }</Text>
+                        <Text>Current: {card?.currentCount ?? fetchedCard?.currentCount}</Text>
+                        <Text>Required: {card?.countRequiredRedeem ?? fetchedCard?.countRequiredRedeem}</Text>
+                    </View>
+                    
                 </View>
                 
                 <View style={styles.pendingRedeemsContainer}>
-                    <Text>Pending Redeems</Text>
-                    <FlatList
-                        data={Object.entries(card?.pendingRedeems ?? fetchedCard?.pendingRedeems ?? {})}
-                        keyExtractor={([key]) => key}
-                        renderItem={({ item: [key, redeem] }) => (
-                            <View style={styles.pendingRedeemsItemContainer} key={key}>
-                                <Text>{redeem?.reward}</Text>
-                                <TouchableOpacity onPress={() => handleOpenModal({key: key, redeem: redeem as string})} style={styles.claimBtn}>
-                                    <Text>Claim</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    />
+                    <View style={styles.pendingRedeemsContent}>
+                        <Text style={styles.titleText}>Pending Redeems</Text>
+                        <FlatList
+                            style={{paddingTop: 20}}
+                            data={Object.entries(card?.pendingRedeems ?? fetchedCard?.pendingRedeems ?? {})}
+                            keyExtractor={([key]) => key}
+                            renderItem={({ item: [key, redeem] }) => (
+                                <View style={styles.pendingRedeemsItemContainer} key={key}>
+                                    <Text>{redeem?.reward}</Text>
+                                    <TouchableOpacity onPress={() => handleOpenModal({key: key, redeem: redeem as string})} style={styles.claimBtn}>
+                                        <Text>Claim</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        />
+                    </View>
+                    
                 </View>
-                {/* { Object.entries(card?.pendingRedeems ?? fetchedCard?.pendingRedeems).map((redeem) => {
-                    return (
-                        <View style={styles.pendingRedeemsItemContainer} key={redeem[0]}>
-                            <Text>{redeem[1]?.reward}</Text>
-                        </View>
-                    )
-                })} */}
-                <ActionButton onPress={handleNavScanner} title="Scan" color={'pink'} />
+                <ActionButton onPress={handleNavScanner} title="Scan" color={'#64A6BD'} />
             </SafeAreaView>
         )
 
@@ -158,11 +184,21 @@ const styles = StyleSheet.create({
     modalQRCodeContainer: {
 
     },
-    cardDetailsCotnainer: {
+    cardDetailsContainer: {
         flex: 1,
+        paddingTop: 10,
+        paddingLeft: 10,
+        paddingRight: 10,
+    },
+    cardDetailsContent: {
+        backgroundColor: 'white',
+        flex: 1,
+        borderRadius: 10,
+        padding: 10,
     },
     pendingRedeemsContainer: {
         flex: 3,
+        padding: 10,
     },
     pendingRedeemsItemContainer: {
         height: 50,
@@ -172,13 +208,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingLeft: 10,
-        paddingEnd: 25,
+        borderTopWidth: .4,
+        borderTopColor: '#BFD7EA',
+        borderBottomWidth: .4,
+        borderBottomColor: '#BFD7EA',
+    },
+    pendingRedeemsContent: {
+        backgroundColor: 'white',
+        flex: 1,
+        borderRadius: 10,
+        padding: 10,
+        paddingTop: 15,
+    },
+    titleText: {
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     claimBtn: {
         width: 80,
         height: 30,
-        backgroundColor: 'green',
         borderRadius: 6,
+        borderWidth: 0.5,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'

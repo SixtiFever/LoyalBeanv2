@@ -80,10 +80,10 @@ const Login: React.FC<LoginProps> = memo(({ type }) => {
     <SafeAreaView edges={["top"]} style={styles.container}>
         <View style={styles.topContainer}>
             <CustomNavbar
-                    height={80}
-                    leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
-                    leftOnPress={handleNavBack}
-                    title='Cafe login' />
+                height={80}
+                leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
+                leftOnPress={handleNavBack}
+                title='Customer Login' />
             <View style={styles.logoContainer}>
                 <LoyalBeanLogo height='150' width='150' color='#2D3142' />
             </View>

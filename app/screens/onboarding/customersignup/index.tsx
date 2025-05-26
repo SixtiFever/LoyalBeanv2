@@ -9,7 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useNavigation } from 'expo-router';
 import { getAuth, onAuthStateChanged, User, UserCredential } from 'firebase/auth';
 import React, { memo, useLayoutEffect, useState } from 'react';
-import { Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomNavbar from '../../../../components/navbar';
 
@@ -94,12 +94,12 @@ const CustomerSignup = () => {
     }
 
   return (
-    <SafeAreaView edges={["top"]}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <>
                 <CustomNavbar
-                    height={80}
+                    height={60}
                     leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
                     leftOnPress={handleNavBack}
                     title='Customer signup' />
@@ -107,7 +107,7 @@ const CustomerSignup = () => {
                         <CustomTextInput 
                             leftIcon={<UserIcon width='15' height='30' color='#D2CBCB' />}
                             height={60} 
-                            widthPercentage={80} 
+                            widthPercentage={90} 
                             placeholder='Enter username' 
                             handleChangeText={handleChangeText}
                             type='username'
@@ -115,7 +115,7 @@ const CustomerSignup = () => {
                         <CustomTextInput
                             leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
                             height={60} 
-                            widthPercentage={80} 
+                            widthPercentage={90} 
                             placeholder='Enter email' 
                             handleChangeText={handleChangeText}
                             type='email'
@@ -124,7 +124,7 @@ const CustomerSignup = () => {
                         <CustomTextInput
                             leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
                             height={60} 
-                            widthPercentage={80} 
+                            widthPercentage={90} 
                             placeholder='Confirm email' 
                             handleChangeText={handleChangeText}
                             type='confirmEmail'
@@ -132,14 +132,14 @@ const CustomerSignup = () => {
 
                         <CustomPasswordInput 
                             height={60} 
-                            widthPercentage={80} 
+                            widthPercentage={90} 
                             placeholder='Enter password' 
                             handleChangeText={handleChangeText}
                             type='password'
                             />
                         <CustomPasswordInput 
                             height={60} 
-                            widthPercentage={80} 
+                            widthPercentage={90} 
                             placeholder='Confirm password'
                             handleChangeText={handleChangeText}
                             type='confirmPassword'
@@ -147,11 +147,11 @@ const CustomerSignup = () => {
                         
                         <ActionButton
                             onPress={handlePickImage}
-                            color={'yellow'}
+                            color={'#84DCCF'}
                             title='Set profile picture'
                         />
 
-                        { imageUri &&  <Image source={{ uri: imageUri }} style={{ height: 100, width: 100 }}  /> }
+                        {/* { imageUri &&  <Image source={{ uri: imageUri }} style={{ height: 100, width: 100 }}  /> } */}
 
                     </ScrollView>
                     <ActionButton title='Signup' onPress={handleSignup} color={'#F87666'} />

@@ -79,8 +79,8 @@ const CafeHome = () => {
                 <View style={styles.bottomContainer}>
                     <View style={styles.bottomCanvas}>
                         <NumberPickerLocal value={quantity} onChange={handleQuantityChange} min={1} max={30} />
-                        <ActionButton onPress={handleGenerateCode} title="Generate QR Code" color={'yellow'} />
-                        <ActionButton onPress={handleNavRedeemScanner} title="Active Redeem" color={'blue'} />
+                        <ActionButton onPress={handleGenerateCode} title="Generate QR Code" color={'#D5DCF9'} />
+                        <ActionButton onPress={handleNavRedeemScanner} title="Active Redeem" color={'#50B2C0'} />
                     </View>
                 </View>
         </SafeAreaView>
@@ -137,6 +137,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
         alignItems: 'center',
         borderRadius: 10,
-        paddingTop: 40,
+        paddingTop: 20,
     }
 })
