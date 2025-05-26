@@ -4,11 +4,13 @@ import { CustomPasswordInput, CustomTextInput } from '@/components/custominputs'
 import { auth } from '@/firebaseconfig';
 import { Customer } from '@/types/User';
 import { customerSignup } from '@/utils/FirebaseAuthentication';
-import { postNewUserFirestore, postNewUserId } from '@/utils/FirebaseController';
+import { postNewUserFirestore, postNewUserId, uploadProfilePicture } from '@/utils/FirebaseController';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useNavigation } from 'expo-router';
-import { UserCredential } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User, UserCredential } from 'firebase/auth';
 import React, { memo, useLayoutEffect, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomNavbar from '../../../../components/navbar';
 
 const CustomerSignup = () => {
@@ -17,7 +19,10 @@ const CustomerSignup = () => {
     const [confirmEmail, setConfirmEmail] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [user, setUser] = useState<Customer>({});
+    const [authUser, setAuthUser] = useState<User>()
     const [text, setText] = useState<string>('')
+    const [mediaLibraryStatus, requestPermission] = ImagePicker.useMediaLibraryPermissions();
+    const [imageUri, setImageUri] = useState<string>()
 
     // router
     const nav = useNavigation();
@@ -28,13 +33,15 @@ const CustomerSignup = () => {
             headerShown: false,
         })
 
+        onAuthStateChanged(getAuth(), (user) => {
+            if (user) setAuthUser(user);
+        })
+
     }, [])
 
 
     const handleSignup = async () => {
-        console.log(user)
-        console.log(confirmPassword)
-        console.log(confirmEmail)
+
         if ( !user.username || user.email !== confirmEmail || user.password !== confirmPassword ) {
             
             alert('Field error encountered')
@@ -51,6 +58,10 @@ const CustomerSignup = () => {
 
             // create user in firestore
             await postNewUserFirestore(usercredential, user);
+
+            // save user profile picture
+            if (!imageUri) return;
+            await uploadProfilePicture(imageUri, usercredential.user.uid)
         }
     }
 
@@ -69,64 +80,85 @@ const CustomerSignup = () => {
         }
     }
 
-    console.log(user)
+    const handlePickImage = async () => {
+    
+        if( !mediaLibraryStatus ) await requestPermission();
+
+        try {
+            const image: ImagePicker.ImagePickerResult = await ImagePicker.launchImageLibraryAsync();
+            setImageUri(image.assets[0].uri);
+        } catch (err) {
+            console.log(err)
+        }
+
+    }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <>
-            <CustomNavbar
-                height={80}
-                leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
-                leftOnPress={handleNavBack}
-                title='Customer signup' />
-                <ScrollView contentContainerStyle={styles.form}>
-                    <CustomTextInput 
-                        leftIcon={<UserIcon width='15' height='30' color='#D2CBCB' />}
-                        height={60} 
-                        widthPercentage={80} 
-                        placeholder='Enter username' 
-                        handleChangeText={handleChangeText}
-                        type='username'
-                        />
-                    <CustomTextInput
-                        leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
-                        height={60} 
-                        widthPercentage={80} 
-                        placeholder='Enter email' 
-                        handleChangeText={handleChangeText}
-                        type='email'
+    <SafeAreaView edges={["top"]}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <>
+                <CustomNavbar
+                    height={80}
+                    leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
+                    leftOnPress={handleNavBack}
+                    title='Customer signup' />
+                    <ScrollView contentContainerStyle={styles.form}>
+                        <CustomTextInput 
+                            leftIcon={<UserIcon width='15' height='30' color='#D2CBCB' />}
+                            height={60} 
+                            widthPercentage={80} 
+                            placeholder='Enter username' 
+                            handleChangeText={handleChangeText}
+                            type='username'
+                            />
+                        <CustomTextInput
+                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
+                            height={60} 
+                            widthPercentage={80} 
+                            placeholder='Enter email' 
+                            handleChangeText={handleChangeText}
+                            type='email'
+                            />
+
+                        <CustomTextInput
+                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
+                            height={60} 
+                            widthPercentage={80} 
+                            placeholder='Confirm email' 
+                            handleChangeText={handleChangeText}
+                            type='confirmEmail'
+                            />
+
+                        <CustomPasswordInput 
+                            height={60} 
+                            widthPercentage={80} 
+                            placeholder='Enter password' 
+                            handleChangeText={handleChangeText}
+                            type='password'
+                            />
+                        <CustomPasswordInput 
+                            height={60} 
+                            widthPercentage={80} 
+                            placeholder='Confirm password'
+                            handleChangeText={handleChangeText}
+                            type='confirmPassword'
+                            />
+                        
+                        <ActionButton
+                            onPress={handlePickImage}
+                            color={'yellow'}
+                            title='Set profile picture'
                         />
 
-                    <CustomTextInput
-                        leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
-                        height={60} 
-                        widthPercentage={80} 
-                        placeholder='Confirm email' 
-                        handleChangeText={handleChangeText}
-                        type='confirmEmail'
-                        />
+                        { imageUri &&  <Image source={{ uri: imageUri }} style={{ height: 100, width: 100 }}  /> }
 
-                    <CustomPasswordInput 
-                        height={60} 
-                        widthPercentage={80} 
-                        placeholder='Enter password' 
-                        handleChangeText={handleChangeText}
-                        type='password'
-                        />
-                    <CustomPasswordInput 
-                        height={60} 
-                        widthPercentage={80} 
-                        placeholder='Confirm password'
-                        handleChangeText={handleChangeText}
-                        type='confirmPassword'
-                        />
-
-                </ScrollView>
-                <ActionButton title='Signup' onPress={handleSignup} color={'#F87666'} />
-            </>
-        </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+                    </ScrollView>
+                    <ActionButton title='Signup' onPress={handleSignup} color={'#F87666'} />
+                </>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

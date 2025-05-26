@@ -114,7 +114,7 @@ const CafeSignup = () => {
                     height={80}
                     leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
                     leftOnPress={handleNavBack}
-                    title='Cafe login'
+                    title='Cafe Signup'
                     color={'#F2F4FF'} />
 
                 <ScrollView

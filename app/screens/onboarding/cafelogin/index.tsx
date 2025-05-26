@@ -74,7 +74,7 @@ const CafeLogin: React.FC<LoginProps> = ({ type }) => {
             height={80}
             leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
             leftOnPress={handleNavBack}
-            title='Customer login' />
+            title='Cafe login' />
 
         <View style={styles.topSection}>
             

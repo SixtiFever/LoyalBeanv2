@@ -406,6 +406,34 @@ export const fetchCafeLogo = async (cafeId: string) => {
     }
 }
 
+
+export const uploadProfilePicture = async (uri: string, userId: string) => {
+
+    try {
+        const filename = `${userId}/profilepicture.png`;
+        const response = await fetch(uri)
+        const blob = await response.blob();
+        const storageRef = ref(storage, filename);
+        const result = await uploadBytesResumable(storageRef, blob);
+        console.log(result)
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+
+export const fetchProfilePicture = async (userId: string) => {
+    try {
+        const fileName: string = `${userId}/profilepicture.png`;
+        const imageRef = ref(storage, fileName);
+        const url = await getDownloadURL(imageRef);
+        console.log(url)
+        return url;
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 /**
  * fetches all prootions from the cafes promotions document
  * both active and non-active

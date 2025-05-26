@@ -63,7 +63,7 @@ export function calculateDaysBetween(timestamp1: Timestamp, timestamp2: Timestam
 export const updateBeanStatuses = (cards: Record<string, Card>): Record<string, Card> => {
     const entries = Object.entries(cards);
     const sortedEntries = entries.sort((a, b) => b[1].totalScanCount - a[1].totalScanCount);
-    console.log(sortedEntries)
+
     const length: number = sortedEntries.length;
     const sortedWithUpdatedBeanStatus = sortedEntries.map(([key, card] , index) => [
         key, 
@@ -79,12 +79,12 @@ export const updateBeanStatuses = (cards: Record<string, Card>): Record<string, 
 const assignBeanStatus = (index: number, totalCards: number): string => {
     const percentile = (index + 1) / totalCards * 100;
 
-    if (percentile <= 1) return BeanType[1];
-    if (percentile <= 5) return BeanType[2];
-    if (percentile <= 15) return BeanType[3];
-    if (percentile <= 40) return BeanType[4];
-    if (percentile <= 80) return BeanType[5];
-    return BeanType[6];
+    if (percentile <= 1) return BeanType[0];
+    if (percentile <= 5) return BeanType[1];
+    if (percentile <= 15) return BeanType[2];
+    if (percentile <= 40) return BeanType[3];
+    if (percentile <= 80) return BeanType[4];
+    return BeanType[5];
 };
 
 export const splitPattern: string = '-%-%-';

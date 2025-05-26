@@ -107,13 +107,15 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
             }
             let newCards: Record<string, Card> = snap.data();
             newCards[uid] = card;
+            console.log(card)
             const updatedCards = updateBeanStatuses(newCards);
             console.log('reached');
+            //console.log(updatedCards)
             transaction.set(docRef, updatedCards);
             console.log('reached 2')
             return card
         }).catch(err => {
-            console.log('RepeatScanner/102 - ', err);
+            console.log('RepeatScanner/116 - ', err);
         });
         const activePromotion: PromotionRecord = await getActivePromotion(cid);
         await updatePromotionInteractions(cid, activePromotion, uid, quantity, redeemCountIncrease.current );

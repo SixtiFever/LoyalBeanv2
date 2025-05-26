@@ -1,6 +1,7 @@
 import { Card } from "@/types/Card";
+import { fetchProfilePicture } from "@/utils/FirebaseController";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import React, { memo, useLayoutEffect, useState } from "react";
+import React, { memo, useEffect, useLayoutEffect, useState } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 interface CustomerRecordProps {
@@ -14,6 +15,7 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
     const [user, setUser] = useState<User>()
     const [totalScanCount, setTotalScanCount] = useState(0);
     const [totalRedeemCount, setTotalRedeemCount] = useState(0);
+    const [imageUri, setImageUri] = useState<string>();
 
     useLayoutEffect(() => {
 
@@ -21,12 +23,25 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
             if (user) setUser(user);
         })
 
+        
+
     }, [])
+
+    useEffect(() => {
+        if (user) {
+            const fetchImage = async () => {
+                const result = await fetchProfilePicture(data.userId);
+                setImageUri(result)
+                console.log(result);
+            }
+            fetchImage();
+        }
+    }, [user])
 
     return (
         <View style={styles.container}>
             <View style={styles.leftSideContainer}>
-                <Image source={deafultIcon} style={styles.image} />
+                <Image source={ imageUri ? { uri: imageUri } : deafultIcon} style={styles.image} />
                 <Text>{data.beanType}</Text>
             </View>
             <View style={styles.rightSideContainer}>
