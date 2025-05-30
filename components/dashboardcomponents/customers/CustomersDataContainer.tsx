@@ -20,6 +20,9 @@ const CustomerDataContainer = () => {
     }
 
     if ( fetchedCardsData ) {
+
+        const sortedCustomers = Object.values(fetchedCardsData).sort((a,b) => b.totalScanCount - a.totalScanCount);
+        console.log(sortedCustomers)
         return (
                 <View style={styles.container}>
                     <View style={styles.dataContainer}>
@@ -27,7 +30,7 @@ const CustomerDataContainer = () => {
                         <FlatList 
                             style={{paddingTop: 10}}
                             ItemSeparatorComponent={() => <View style={{height: 10,}} />}
-                            data={Object.values(fetchedCardsData)}
+                            data={sortedCustomers}
                             keyExtractor={(item) => item.userId}
                             renderItem={({item}) => (
                                 <CustomerRecord data={item} />

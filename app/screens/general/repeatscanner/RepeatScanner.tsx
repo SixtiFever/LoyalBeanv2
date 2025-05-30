@@ -101,7 +101,7 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
                 console.log('Redeem quant: ', quantityOfRedeems)
                 for ( let i = 0; i < quantityOfRedeems; i++ ) {
                     const randomId: string = uuidv4();
-                    card.pendingRedeems[`${uid}${splitPattern}${randomId}`] = { reward: activePromotion.reward };
+                    card.pendingRedeems[`${uid}${splitPattern}${randomId}`] = {  reward: card.personalisedRewardActive ? card.reward : activePromotion.reward };
                 }
 
             }
@@ -117,6 +117,11 @@ const RepeatScanner: React.FC<CardScannerProps> = ({}) => {
         }).catch(err => {
             console.log('RepeatScanner/116 - ', err);
         });
+
+        // if customer has a personalised reward on their card, don't update promotion interactions
+        if ( result && result['personalisedRewardActive'] ) {
+            return;
+        }
         const activePromotion: PromotionRecord = await getActivePromotion(cid);
         await updatePromotionInteractions(cid, activePromotion, uid, quantity, redeemCountIncrease.current );
        

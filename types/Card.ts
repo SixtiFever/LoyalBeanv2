@@ -19,6 +19,8 @@ export type Card = {
     pendingRedeems?: PromotionRedeem;
     cafeName: string;
     archivedRedeems?: PromotionRedeem;
+    favouritePromotionId?: string;
+    personalisedRewardActive?: boolean;
 }
 
 export type PromotionRedeem = Record<string, {reward: string}>

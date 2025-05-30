@@ -1,18 +1,19 @@
 import useFetchCafeCards from "@/app/hooks/useFetchCafeCards"
 import useFetchCafeData from "@/app/hooks/useFetchCafeData"
 import useFetchPromotions from "@/app/hooks/useFetchPromotions"
-import { BackIcon } from "@/assets/icons"
+import { BackIcon, BeanIcon } from "@/assets/icons"
 import { CustomersDataContainer, PromotionalDataContainer } from "@/components/dashboardcomponents"
 import { HorizontalPicker } from "@/components/horizontalpicker"
 import CustomNavbar from '@/components/navbar'
 import { firestore } from "@/firebaseconfig"
+import { Card } from "@/types/Card"
 import { DashboardMenuOption } from "@/types/DashboardMenuOption"
-import { PromotionRecord } from "@/types/Promotion"
+import { PromotionInteractions, PromotionRecord } from "@/types/Promotion"
 import { Cafe } from "@/types/User"
 import { getSelectedOption } from "@/utils/utils"
 import { useNavigation, useRouter } from "expo-router"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
-import { collection, doc, DocumentData, onSnapshot } from "firebase/firestore"
+import { collection, doc, DocumentData, getDoc, onSnapshot, setDoc } from "firebase/firestore"
 import { memo, ReactNode, useEffect, useLayoutEffect, useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -91,7 +92,46 @@ const CafeDashboard = () => {
         console.log(selectedOption)
     }, [options])
 
-    
+    const handleUpdateFavourites = async () => {
+        const colRef = collection(firestore, 'promotions');
+        const docRef = doc(colRef, id);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) return;
+        const promotions: Record<string, PromotionRecord> = snap.data();
+        const favPromotions: Record<string, {promoId: string, scans: number}> = {};
+        for ( let promoId in promotions ) {
+            const interactions: PromotionInteractions | undefined = promotions[promoId].interactions;
+            for ( let uid in interactions ) {
+                if ( !favPromotions[uid] ) {
+                    favPromotions[uid] = { promoId: promoId, scans: interactions[uid].scans }
+                } else {
+                    favPromotions[uid] = favPromotions[uid].scans < interactions[uid].scans ? {promoId: promoId, scans: interactions[uid].scans} : favPromotions[uid];
+                }
+            }
+        }
+
+        const cardsColRef = collection(firestore, 'cards');
+        const cardsDocRef = doc(cardsColRef, id);
+        const cardsSnap = await getDoc(cardsDocRef);
+        if (!cardsSnap.exists()) return;
+        const cards: Record<string, Card> = cardsSnap.data();
+        for ( let uid in cards ) {
+            if ( favPromotions[uid] ) {
+                cards[uid]['favouritePromotionId'] = favPromotions[uid].promoId;
+            }
+        }
+        setDoc(cardsDocRef, cards)
+        // for ( const docSnap of querySnap.docs ) {
+        //     const customerId = docSnap.id;
+        //     if ( favPromotions[customerId] ) {
+        //         await updateDoc(doc(firestore, 'customers', customerId), {
+        //             favouritePromotionId: favPromotions[customerId].promoId
+        //         })
+        //     }
+        // }
+        // connect to promotions collection
+        // 
+    }
 
     return (
         <SafeAreaView edges={["top"]} style={styles.container}>
@@ -101,6 +141,8 @@ const CafeDashboard = () => {
                 title="Dashboard"
                 leftOnPress={handleNavBack}
                 height={60}
+                rightIcon={<BeanIcon height="16" width="16" />}
+                rightOnPress={handleUpdateFavourites}
             />
             <HorizontalPicker 
                 options={options}

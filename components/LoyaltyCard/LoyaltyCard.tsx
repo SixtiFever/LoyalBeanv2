@@ -79,7 +79,6 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
                         <Text style={styles.cafeName}>{cardData.cafeName ?? 'Cafe Name Goes Here'}</Text>
                     </View>
                     <View style={styles.rewardContainer}>
-                        {/* <StarIcon height="25" width="25" /> */}
                         <Text style={styles.labelText}>{cardData.reward ?? 'Reward goes here'}</Text>
                     </View>
                     <View style={styles.statsContainer}>

@@ -72,7 +72,7 @@ const CafeHome = () => {
                 />
                 <View style={styles.qrCodeContainer}>
                     <View style={styles.innerQrContainer}>
-                        { qrdata ? <QRCode size={250} value={qrdata} /> : 'QR Code goes here' }
+                        { qrdata ? <QRCode size={250} value={qrdata} /> : 'Generate QR Code' }
                     </View>
                     <Text style={styles.text}>{quantity} coffees</Text>
                 </View>
