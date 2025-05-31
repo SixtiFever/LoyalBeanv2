@@ -271,7 +271,7 @@ export const updatePromotionInteractions = async (cafeId: string, activePromotio
 }
 
 
-export const getActivePromotion = async (cafeId: string) => {
+export const getActivePromotion = async (cafeId: string | undefined): Promise<PromotionRecord | undefined> => {
     const colRef = collection(firestore, 'promotions');
     const docRef = doc(colRef, cafeId);
     try {

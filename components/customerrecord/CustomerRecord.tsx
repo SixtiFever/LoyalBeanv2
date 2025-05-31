@@ -1,7 +1,7 @@
 import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
 import { PromotionRecord } from "@/types/Promotion";
-import { fetchProfilePicture } from "@/utils/FirebaseController";
+import { fetchProfilePicture, getActivePromotion } from "@/utils/FirebaseController";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { memo, useEffect, useLayoutEffect, useState } from "react";
@@ -42,21 +42,20 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
     }, [user])
 
     const handleActivatePersonalisedPromotion = async () => {
+        const colRef = collection(firestore, 'cards');
+        const docRef = doc(colRef, user?.uid);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) return;
+        const promoColRef = collection(firestore, 'promotions');
+        const promoDocRef = doc(promoColRef, user?.uid);
+        const promoSnap = await getDoc(promoDocRef);
+        if ( !promoSnap.exists() ) return;
 
         if ( !isPersonalisedRewardActive ) {
-            const colRef = collection(firestore, 'cards');
-            const docRef = doc(colRef, user?.uid);
-            const snap = await getDoc(docRef);
-            if (!snap.exists()) return;
-            console.log(snap.data())
+            
             const favPromoId: string = snap.data()[data.userId]['favouritePromotionId'];
-
-            const promoColRef = collection(firestore, 'promotions');
-            const promoDocRef = doc(promoColRef, user?.uid);
-            const promoSnap = await getDoc(promoDocRef);
-            if ( !promoSnap.exists() ) return;
             const favPromo: PromotionRecord = promoSnap.data()[favPromoId];
-            console.log(favPromo);
+
             updateDoc(docRef, { 
                 [`${data.userId}.reward`] :  favPromo.reward,
                 [`${data.userId}.countRequiredRedeem`] : favPromo.purchaseMilestone,
@@ -68,6 +67,15 @@ const CustomerRecord: React.FC<CustomerRecordProps> = ({data}) => {
             setIsPersonalisedRewardActive(true);
         } else {
             // reverse the above
+            const activePromo: PromotionRecord | undefined = await getActivePromotion(user?.uid)
+            updateDoc(docRef, { 
+                [`${data.userId}.reward`] :  activePromo?.reward,
+                [`${data.userId}.countRequiredRedeem`] : activePromo?.purchaseMilestone,
+                [`${data.userId}.personalisedRewardActive`] : false,
+            }).catch(err => {
+                console.log(err);
+            })
+            setIsPersonalisedRewardActive(false);
         }
         
     }
