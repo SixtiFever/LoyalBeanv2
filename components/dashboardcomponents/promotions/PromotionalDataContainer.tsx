@@ -2,8 +2,9 @@ import { PlusIcon } from "@/assets/icons";
 import { PromotionCard } from "@/components/promotioncard";
 import { SortPicker } from "@/components/sortpicker";
 import { PromotionRecord } from "@/types/Promotion";
-import { filterActivePromotion } from "@/utils/utils";
+import { calculateDaysBetween, filterActivePromotion } from "@/utils/utils";
 import { useNavigation, useRouter } from "expo-router";
+import { Timestamp } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 
@@ -27,19 +28,23 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
 
         const promotion = filterActivePromotion(promotions);
         setActivePromotion(promotion);
-        setAllPromotions(promotions);
+        const activePromotions: [string, PromotionRecord][] = Object.entries(promotions).filter((promo) => promo[1].active == false);
+        const promotionsRecord: Record<string, PromotionRecord> = Object.fromEntries(activePromotions);
+        setAllPromotions(promotionsRecord);
 
     }, [promotions])
 
     const handleNavCreateNew = () => {
-        console.log(activePromotion)
+
         router.navigate({
             pathname: '/screens/general/createpromotion',
             params: { activePromotion: JSON.stringify(activePromotion) }
         })
+
     }
 
     const sortedPromotions = useMemo(() => {
+
         const promotions = Object.values(allPromotions);
 
         return promotions.sort((a, b) => {
@@ -76,6 +81,11 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
                         <PlusIcon onPress={handleNavCreateNew} width="20" height="20" />
                     </View>
                     { activePromotion && <Text>{JSON.stringify(activePromotion.reward)}</Text> }
+                    { activePromotion && <Text>Milestone: {JSON.stringify(activePromotion.purchaseMilestone)}</Text> }
+                    { activePromotion && <Text>Scans: {JSON.stringify(activePromotion.scans)}</Text> }
+                    { activePromotion && <Text>Redeems: {JSON.stringify(activePromotion.redeems)}</Text> }
+                    { activePromotion && <Text>Days Running: {calculateDaysBetween(activePromotion.startDateTimestamp, Timestamp.now())}</Text> }
+                    {/* { activePromotion && <Text>{JSON.stringify(activePromotion.)}</Text> } */}
                 </View>
             </View>
             <View style={styles.previousPromotionSection}>
