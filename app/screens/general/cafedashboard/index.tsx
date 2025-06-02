@@ -1,7 +1,7 @@
 import useFetchCafeCards from "@/app/hooks/useFetchCafeCards"
 import useFetchCafeData from "@/app/hooks/useFetchCafeData"
 import useFetchPromotions from "@/app/hooks/useFetchPromotions"
-import { BackIcon, BeanIcon } from "@/assets/icons"
+import { BackIcon, RefreshStarIcon } from "@/assets/icons"
 import { CustomersDataContainer, PromotionalDataContainer } from "@/components/dashboardcomponents"
 import { HorizontalPicker } from "@/components/horizontalpicker"
 import CustomNavbar from '@/components/navbar'
@@ -141,7 +141,7 @@ const CafeDashboard = () => {
                 title="Dashboard"
                 leftOnPress={handleNavBack}
                 height={60}
-                rightIcon={<BeanIcon height="16" width="16" />}
+                rightIcon={<RefreshStarIcon height="24" width="24" />}
                 rightOnPress={handleUpdateFavourites}
             />
             <HorizontalPicker 

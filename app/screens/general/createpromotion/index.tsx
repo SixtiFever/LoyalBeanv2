@@ -96,10 +96,14 @@ const CreatePromotion = () => {
                 alert('Couldn\'t calculate per day stats');
                 return;
             }
-            archivedPromotion.current.runLengthDays = daysRun;
-            archivedPromotion.current.scansPerDay = perDayStats.scansPerDay;
-            archivedPromotion.current.redeemsPerDay = perDayStats.redeemsPerDay;
 
+            const spd: number = Number(perDayStats.scansPerDay.toFixed(2));
+            const rpd: number = Number(perDayStats.redeemsPerDay.toFixed(2));
+
+            archivedPromotion.current.runLengthDays = daysRun;
+            archivedPromotion.current.scansPerDay = spd;
+            archivedPromotion.current.redeemsPerDay = rpd;
+            console.log(archivedPromotion.current);
             const id: string = uuidv4()
             const promotion: PromotionRecord = { 
                 promotionId: id,
