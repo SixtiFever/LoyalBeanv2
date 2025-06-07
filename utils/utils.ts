@@ -87,6 +87,11 @@ const assignBeanStatus = (index: number, totalCards: number): string => {
     return BeanType[5];
 };
 
+
+export const calculatePromotionScans = (interactions: PromotionInteractions) => {
+
+}
+
 export const splitPattern: string = '-%-%-';
 
 export enum BeanType {

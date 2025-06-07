@@ -80,11 +80,13 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
                         <Text>Active</Text>
                         <PlusIcon onPress={handleNavCreateNew} width="20" height="20" />
                     </View>
-                    { activePromotion && <Text>{JSON.stringify(activePromotion.reward)}</Text> }
-                    { activePromotion && <Text>Milestone: {JSON.stringify(activePromotion.purchaseMilestone)}</Text> }
-                    { activePromotion && <Text>Scans: {JSON.stringify(activePromotion.scans)}</Text> }
-                    { activePromotion && <Text>Redeems: {JSON.stringify(activePromotion.redeems)}</Text> }
-                    { activePromotion && <Text>Days Running: {calculateDaysBetween(activePromotion.startDateTimestamp, Timestamp.now())}</Text> }
+                    <View style={styles.activeCurrentStats}>
+                        { activePromotion && <Text>Reward: {JSON.stringify(activePromotion.reward)}</Text> }
+                        { activePromotion && <Text>Milestone: {JSON.stringify(activePromotion.purchaseMilestone)}</Text> }
+                        { activePromotion && <Text>Scans: {JSON.stringify(activePromotion.scans)}</Text> }
+                        { activePromotion && <Text>Redeems: {JSON.stringify(activePromotion.redeems)}</Text> }
+                        { activePromotion && <Text>Days Running: {calculateDaysBetween(activePromotion.startDateTimestamp, Timestamp.now())}</Text> }
+                    </View>
                     {/* { activePromotion && <Text>{JSON.stringify(activePromotion.)}</Text> } */}
                 </View>
             </View>
@@ -120,15 +122,24 @@ const styles = StyleSheet.create({
     },
     activePromotionContainer: {
         height: '100%',
-        padding: 20,
+        paddingTop: 10,
+        paddingBottom: 20,
+        paddingLeft: 20,
+        paddingRight: 20,
         backgroundColor: 'white',
         borderRadius: 10,
+    },
+    activeCurrentStats: {
+        paddingTop: 10,
     },
     topBarContainer: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        borderBottomWidth: 0.3,
+        borderBottomColor: 'rgb(167, 165, 168)',
+        paddingBottom: 5,
     },
     previousPromotionSection: {
         flex: 1,

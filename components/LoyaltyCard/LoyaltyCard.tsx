@@ -1,5 +1,5 @@
 import useFetchCard from "@/app/hooks/useFetchCard";
-import { BeanIcon, ScannerIcon, TrophyIcon } from "@/assets/icons";
+import { BeansIcon, ShieldIcon, TrophyIcon } from "@/assets/icons";
 import { firestore } from "@/firebaseconfig";
 import { Card } from "@/types/Card";
 import { useRouter } from "expo-router";
@@ -83,7 +83,7 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
                     </View>
                     <View style={styles.statsContainer}>
                         <View style={styles.rewardContainer}>
-                            <ScannerIcon height="24" width="24" />
+                            <BeansIcon height="24" width="24" />
                             <Text style={styles.labelText}>{cardData.currentCount ?? '999'}</Text>
                         </View>
                         <View style={[styles.rewardContainer, {paddingStart: 30}]}>
@@ -92,7 +92,7 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
                         </View>
                     </View>
                     <View style={styles.rewardContainer}>
-                        <BeanIcon height="24" width="24" />
+                        <ShieldIcon height="30" width="20" />
                         <Text style={styles.labelText}>{ cardData.beanType ?? 'Status not available'}</Text>
                     </View>
                 </View>
@@ -100,7 +100,7 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
 
                     <Image 
                         source={{uri: cardData.logoUri ?? card?.logoUri ?? ''}}
-                        style={{ height: '50%', width: '50%' }}
+                        style={{ height: '90%', width: '90%' }}
                         resizeMode="contain" />
 
                 </View>
@@ -112,7 +112,7 @@ const LoyaltyCard: React.FC<CardProps> = ({user, cafeId, data}) => {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: 150,
+        height: 160,
         display: 'flex',
         flexDirection: 'row',
         backgroundColor: 'white',
@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
         // width: 40,
         justifyContent:'center',
         alignItems: 'flex-end',
-        flex: 1,
+        width: '40%',
+        // flex: 1,
     },
     cafeName: {
         // paddingLeft: 15,

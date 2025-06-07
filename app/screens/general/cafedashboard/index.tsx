@@ -121,16 +121,7 @@ const CafeDashboard = () => {
             }
         }
         setDoc(cardsDocRef, cards)
-        // for ( const docSnap of querySnap.docs ) {
-        //     const customerId = docSnap.id;
-        //     if ( favPromotions[customerId] ) {
-        //         await updateDoc(doc(firestore, 'customers', customerId), {
-        //             favouritePromotionId: favPromotions[customerId].promoId
-        //         })
-        //     }
-        // }
-        // connect to promotions collection
-        // 
+        
     }
 
     return (

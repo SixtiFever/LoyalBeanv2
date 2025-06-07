@@ -1,5 +1,5 @@
 import useFetchCard from "@/app/hooks/useFetchCard"
-import { BackIcon } from "@/assets/icons"
+import { BackIcon, UsersIcon } from "@/assets/icons"
 import { ActionButton } from "@/components/buttons"
 import CustomNavbar from '@/components/navbar'
 import { firestore } from "@/firebaseconfig"
@@ -77,6 +77,13 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
         router.back();
     }
 
+    const handleNavUsers = () => {
+        router.navigate({
+            pathname: '/screens/general/users/Users',
+            params: {cafeId: cid}
+        })
+    }
+
     if (error && !isLoading) {
         return (
             <View>
@@ -94,7 +101,7 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
     }
 
     if ( fetchedCard || card) {
-
+        console.log(card)
         return (
             <SafeAreaView edges={["top"]} style={styles.container}>
                 <CustomNavbar
@@ -104,6 +111,8 @@ const LoyaltyCardDetails: React.FC<LoyaltyCardProps> = ({}) => {
                         hasBottomBorder={true}
                         leftIcon={<BackIcon height='20' width='30' color='#424C55' />}
                         leftOnPress={handleNavBack}
+                        rightIcon={<UsersIcon height="30" width="40" color="#424C55" />}
+                        rightOnPress={handleNavUsers}
                         title='Card Details' />
 
                 { redeemClaim &&  
