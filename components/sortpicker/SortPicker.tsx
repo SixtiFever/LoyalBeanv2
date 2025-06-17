@@ -1,7 +1,5 @@
-// SortPicker.tsx
-import { Picker } from '@react-native-picker/picker';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type SortKey = 'active' | 'runLengthDays' | 'scansPerDay' | 'redeemsPerDay';
 
@@ -10,47 +8,73 @@ interface SortPickerProps {
     onValueChange: (value: SortKey) => void;
 }
 
+const filterOptions: { label: string; value: SortKey }[] = [
+    // { label: 'Active', value: 'active' },
+    { label: 'Scans / Day', value: 'scansPerDay' },
+    { label: 'Run Length', value: 'runLengthDays' },
+    { label: 'Redeems / Day', value: 'redeemsPerDay' },
+];
+
 const SortPicker: React.FC<SortPickerProps> = ({ selectedValue, onValueChange }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Previous Promotions</Text>
-            <Picker
-                selectedValue={selectedValue}
-                onValueChange={(itemValue) => onValueChange(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Active" value="active" />
-                <Picker.Item label="Run Length (Days)" value="runLengthDays" />
-                <Picker.Item label="Scans per Day" value="scansPerDay" />
-                <Picker.Item label="Redeems per Day" value="redeemsPerDay" />
-            </Picker>
+            <View style={styles.buttonContainer}>
+                {filterOptions.map((option) => (
+                    <TouchableOpacity
+                        key={option.value}
+                        onPress={() => onValueChange(option.value)}
+                        style={[
+                            styles.button,
+                            selectedValue === option.value && styles.selectedButton,
+                        ]}
+                    >
+                        <Text
+                            style={[
+                                styles.buttonText,
+                                selectedValue === option.value && styles.selectedButtonText,
+                            ]}
+                        >
+                            {option.label}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 2,
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: .1,
-        borderBottomColor: 'black',
-        paddingBottom: 5,
+        marginVertical: 10,
     },
     label: {
-        fontSize: 14,
-        marginBottom: 2,
+        fontSize: 16,
         fontWeight: '600',
+        marginBottom: 8,
     },
-    picker: {
-        height: 30,
-        width: '50%',
-        borderWidth: 0,
+    buttonContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    button: {
         backgroundColor: '#F8F4F9',
-        padding: 4,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
         borderRadius: 8,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    selectedButton: {
+        backgroundColor: '#6200EE',
+    },
+    buttonText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    selectedButtonText: {
+        color: '#fff',
     },
 });
 

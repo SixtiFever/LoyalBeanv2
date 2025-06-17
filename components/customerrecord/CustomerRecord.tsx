@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 8,
         // justifyContent:'space-between',
-        borderWidth: 0.2,
+        borderWidth: .6,
         borderColor: 'rgba(0,0,0,0.3)',
         padding: 10,
     },

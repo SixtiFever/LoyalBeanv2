@@ -349,6 +349,10 @@ export const updateCardsWithNewPromotion = async (cafeId: string, newPromotion: 
 }
 
 
+/**
+ * 
+ * 
+*/
 export const resolvePromotionRedeem = async (cafeId: string, customerId: string, promotionId: string) => {
     const result = runTransaction(firestore, async (transaction) => {
 
@@ -380,8 +384,14 @@ export const resolvePromotionRedeem = async (cafeId: string, customerId: string,
     
 }
 
-export const uploadCafeLogo = async (cafeData: Partial<Cafe>) => {
 
+/**
+ * @param // partial cafe object
+ * Function is called during cafe registration process.
+ * Creates file path using cafe id & string concatenation
+ * Converts image to blob, creates a bucket reference before uploading via byte transfer
+*/
+export const uploadCafeLogo = async (cafeData: Partial<Cafe>) => {
     try {
         const filename = `${cafeData.id}/logo.png`;
         const response = await fetch(cafeData.logo)
@@ -395,6 +405,11 @@ export const uploadCafeLogo = async (cafeData: Partial<Cafe>) => {
 }
 
 
+/**
+ * @param // cafe id
+ * @returns // url string of profile image storage location
+ * fetches cafe logo from designated storage bucket.
+*/
 export const fetchCafeLogo = async (cafeId: string) => {
     try {
         const fileName: string = `${cafeId}/logo.png`;
@@ -406,8 +421,16 @@ export const fetchCafeLogo = async (cafeId: string) => {
     }
 }
 
-
-export const uploadProfilePicture = async (uri: string, userId: string) => {
+/**
+ * @param // uri string of profile image
+ * @param // customer user id
+ * @returns // promise void
+ * creates file path to storage bucket.
+ * converts fetch response to blob.
+ * Creates storage reference.
+ * uploaded image to bucket via byte transfer.
+*/
+export const uploadProfilePicture = async (uri: string, userId: string): Promise<void> => {
 
     try {
         const filename = `${userId}/profilepicture.png`;
@@ -415,7 +438,7 @@ export const uploadProfilePicture = async (uri: string, userId: string) => {
         const blob = await response.blob();
         const storageRef = ref(storage, filename);
         const result = await uploadBytesResumable(storageRef, blob);
-        console.log(result)
+
     } catch (err) {
         console.log(err);
     }
@@ -427,7 +450,7 @@ export const fetchProfilePicture = async (userId: string) => {
         const fileName: string = `${userId}/profilepicture.png`;
         const imageRef = ref(storage, fileName);
         const url = await getDownloadURL(imageRef);
-        console.log(url)
+
         return url;
     } catch (err) {
         console.log(err);

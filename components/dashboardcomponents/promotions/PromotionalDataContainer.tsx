@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     activePromotionSection: {
-        height: '30%',
+        height: '25%',
         width: '100%',
         borderBottomWidth: .1,
         padding: 10,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     activePromotionContainer: {
         height: '100%',
         paddingTop: 10,
-        paddingBottom: 20,
+        paddingBottom: 10,
         paddingLeft: 20,
         paddingRight: 20,
         backgroundColor: 'white',

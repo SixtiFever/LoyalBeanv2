@@ -22,11 +22,10 @@ const CustomerDataContainer = () => {
     if ( fetchedCardsData ) {
 
         const sortedCustomers = Object.values(fetchedCardsData).sort((a,b) => b.totalScanCount - a.totalScanCount);
-        console.log(sortedCustomers)
+
         return (
                 <View style={styles.container}>
                     <View style={styles.dataContainer}>
-                        <Text>Customers</Text>
                         <FlatList 
                             style={{paddingTop: 10}}
                             ItemSeparatorComponent={() => <View style={{height: 10,}} />}

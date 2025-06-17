@@ -35,14 +35,14 @@ const PromotionCard: React.FC<PromotionCardProps> = ({data}) => {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: 100,
+        height: 110,
         display: 'flex',
         flexDirection: 'column',
-        padding: 10,
+        padding: 12,
         borderRadius: 8,
         justifyContent:'space-between',
-        borderWidth: 0.2,
-        borderColor: 'rgba(0,0,0,0.3)'
+        borderWidth: .6,
+        borderColor: 'rgba(0,0,0,0.3)',
     },
     rewardContainer: {
         display: 'flex',
