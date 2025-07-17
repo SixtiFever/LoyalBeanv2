@@ -1,4 +1,3 @@
-import { Image } from "react-native-svg";
 import { Geolocations } from "./Geolocations";
 
 export interface User {
@@ -10,6 +9,9 @@ export interface User {
 export interface Customer extends User {
     username?: string;
     cafes?: string[],
+    role?: string;
+    employer?: string;
+    interests?: string[];
 }
 
 export interface Cafe extends User {
@@ -20,5 +22,5 @@ export interface Cafe extends User {
     addresses: string[];  // text addresses
     redeemCount: number;
     reward: string;
-    customers?: string[],
+    customers?: string[];
 }

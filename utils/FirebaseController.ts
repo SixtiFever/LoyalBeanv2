@@ -354,6 +354,7 @@ export const updateCardsWithNewPromotion = async (cafeId: string, newPromotion: 
  * 
 */
 export const resolvePromotionRedeem = async (cafeId: string, customerId: string, promotionId: string) => {
+    console.log('test')
     const result = runTransaction(firestore, async (transaction) => {
 
         const colRef = collection(firestore, 'cards');
@@ -369,17 +370,20 @@ export const resolvePromotionRedeem = async (cafeId: string, customerId: string,
         }
         // add redeemed promotion to archivedRedeems
         const archivedRedeems: Record<string, PromotionRedeem> = snap.data()[customerId].archivedRedeems;
+
         archivedRedeems[promotionId] = redeemedPromotion;
 
         // delete redeemed promotion from pendingRedeems
         delete pendingRedeems[promotionId];
-
+        console.log('pending post: ',archivedRedeems)
         transaction.update(docRef, { 
             [`${customerId}.pendingRedeems`]: pendingRedeems,
             [`${customerId}.archivedRedeems`]: archivedRedeems
          })
 
         return redeemedPromotion;
+    }).catch(err => {
+        console.log(err);
     })
     
 }

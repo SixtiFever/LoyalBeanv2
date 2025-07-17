@@ -3,6 +3,7 @@ import { fetchProfilePicture } from "@/utils/FirebaseController";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import React, { memo, useEffect, useLayoutEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollableInterests } from "../interests";
 
 interface CustomerRecordProps {
     data: Card;
@@ -36,6 +37,8 @@ const CustomerRecordSocial: React.FC<CustomerRecordProps> = ({data}) => {
             }
             fetchImage();
         }
+
+        console.log(data)
     }, [user])
 
     const handleMessage = async () => {
@@ -46,12 +49,15 @@ const CustomerRecordSocial: React.FC<CustomerRecordProps> = ({data}) => {
         <View style={styles.container}>
             <View style={styles.leftSideContainer}>
                 <Image source={ imageUri ? { uri: imageUri } : deafultIcon} style={styles.image} />
+                <Text>{data.beanType}</Text>
             </View>
             <View style={styles.rightSideContainer}>
                 {/* <Text>{user?.displayName}</Text> */}
                 <Text>{data.userEmail}</Text>
-                <Text>{data.beanType}</Text>
-                <Text>{data.dateCardUpdated.toDate().toDateString()}</Text>
+                <Text>{data.role} @ {data.employer}</Text>
+                <ScrollableInterests data={data.interests} />
+                {/* <Text>{data.beanType}</Text> */}
+                {/* <Text>{data.dateCardUpdated.toDate().toDateString()}</Text> */}
                 <View style={styles.buttonsContainer}>
                     {/* <TouchableOpacity style={styles.claimBtn}>
                         <Text>Notify</Text>
@@ -69,7 +75,7 @@ const CustomerRecordSocial: React.FC<CustomerRecordProps> = ({data}) => {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: 120,
+        height: 150,
         display: 'flex',
         flexDirection: 'row',
         borderTopWidth: 0.2,
@@ -84,14 +90,15 @@ const styles = StyleSheet.create({
     },
     rightSideContainer: {
         display: 'flex',
+        // height: 100,
         flexDirection: 'column',
         flex: 1,
         paddingStart: 35,
         justifyContent: 'space-evenly',
     },
     image: {
-        height: 60,
-        width: 60,
+        height: 80,
+        width: 80,
         borderColor: 'rgba(0,0,0,0.2)',
         borderWidth: 1,
         borderRadius: '100%',

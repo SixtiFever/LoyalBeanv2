@@ -5,8 +5,8 @@ interface CustomTextInputProps extends TextInputProps {
     leftIcon?: ReactNode;
     widthPercentage: number;  // % occupancy width of parent container
     height: number;
-    handleChangeText: any;
-    type: 'email' | 'password' | 'username' | 'confirmEmail' | 'shopname' | 'reward';
+    handleChangeText?: any;
+    type: 'email' | 'password' | 'username' | 'confirmEmail' | 'shopname' | 'reward' | 'employer' | 'role' | 'interests';
 }
 
 const CustomTextInput: React.FC<CustomTextInputProps> = ({leftIcon, type, widthPercentage, height, handleChangeText, ...props}) => {

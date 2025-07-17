@@ -9,7 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useNavigation } from 'expo-router';
 import { getAuth, onAuthStateChanged, User, UserCredential } from 'firebase/auth';
 import React, { memo, useLayoutEffect, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomNavbar from '../../../../components/navbar';
 
@@ -19,6 +19,8 @@ const CustomerSignup = () => {
     const [confirmEmail, setConfirmEmail] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [user, setUser] = useState<Customer>({});
+    const [interests, setInterests] = useState<string[]>([])
+    const [interest, setInterest] = useState<string>()
     const [authUser, setAuthUser] = useState<User>()
     const [text, setText] = useState<string>('')
     const [mediaLibraryStatus, requestPermission] = ImagePicker.useMediaLibraryPermissions();
@@ -41,7 +43,7 @@ const CustomerSignup = () => {
 
 
     const handleSignup = async () => {
-
+        
         if ( !user.username || user.email !== confirmEmail || user.password !== confirmPassword ) {
             
             alert('Field error encountered')
@@ -57,7 +59,7 @@ const CustomerSignup = () => {
             await postNewUserId(usercredential)
 
             // create user in firestore
-            await postNewUserFirestore(usercredential, user);
+            await postNewUserFirestore(usercredential, {...user, interests: interests});
 
             // save user profile picture
             if (!imageUri) return;
@@ -70,8 +72,8 @@ const CustomerSignup = () => {
     }
 
     const handleChangeText = (type: string, e?: any) => {
-        console.log(e);
-        if ( type === 'username' || type === 'password' || type === 'email' ) {
+        console.log(interests)
+        if ( type === 'username' || type === 'password' || type === 'email' || type == 'employer' || type == 'role' || type == 'interests') {
             setUser((prev: Partial<Customer>) => ({
                 ...prev, [type]: e }))
         } else {
@@ -92,6 +94,16 @@ const CustomerSignup = () => {
         }
 
     }
+
+
+    const handleAddInterest = () => {
+        if ( interest && !interests?.includes(interest) ) {
+            setInterests( (prev) => [...prev, interest])
+            setInterest('')
+        }
+    }
+
+    console.log(interests)
 
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
@@ -129,6 +141,47 @@ const CustomerSignup = () => {
                             handleChangeText={handleChangeText}
                             type='confirmEmail'
                             />
+
+                        <CustomTextInput
+                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
+                            height={60} 
+                            widthPercentage={90} 
+                            placeholder='Job Role' 
+                            handleChangeText={handleChangeText}
+                            type='role'
+                            />
+                        
+                        <CustomTextInput
+                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
+                            height={60} 
+                            widthPercentage={90} 
+                            placeholder='Employer' 
+                            handleChangeText={handleChangeText}
+                            type='employer'
+                            />
+
+                        {/* <CustomTextInput
+                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
+                            height={60} 
+                            widthPercentage={90} 
+                            placeholder='Interests (separted by comma)' 
+                            // handleChangeText={handleChangeText}
+                            onChangeText={setInterests}
+                            type='interests'
+                            /> */}
+                        
+                        <TextInput
+                            style={styles.input}
+                            placeholder='Add an interet'
+                            onChangeText={setInterest}
+                            value={interest}
+                        
+                        />
+                        <ActionButton 
+                            title='Add interest'
+                            color={'#CCE8CC'}
+                            onPress={handleAddInterest}
+                        />
 
                         <CustomPasswordInput 
                             height={60} 
@@ -179,7 +232,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 8,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
     paddingHorizontal: 12,
     marginBottom: 16,
   },

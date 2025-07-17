@@ -21,6 +21,9 @@ export type Card = {
     archivedRedeems?: PromotionRedeem;
     favouritePromotionId?: string;
     personalisedRewardActive?: boolean;
+    interests?: string[],
+    role?: string,
+    employer?: string,
 }
 
 export type PromotionRedeem = Record<string, {reward: string}>

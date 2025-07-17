@@ -33,12 +33,16 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],[
+      ],
+      [
         "expo-font",
         {
-            "fonts": ["/assets/fonts/NationalPark-VariableFont_wght.ttf"]
+          "fonts": [
+            "/assets/fonts/NationalPark-VariableFont_wght.ttf"
+          ]
         }
-      ], [
+      ],
+      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
@@ -55,7 +59,8 @@
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
