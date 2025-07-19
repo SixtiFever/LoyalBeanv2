@@ -28,6 +28,16 @@ export const postNewUserFirestore = async (usercredential: UserCredential, user:
     
 }
 
+
+
+export const fetchUser = async (userId: string): Promise<false | Customer> => {
+    const colRef = collection(firestore, 'customers');
+    const docRef = doc(colRef, userId);
+    const snap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+    if (!snap.exists()) return false
+    return snap.data() as Customer;
+}
+
 export const postNewUserId = async (user: UserCredential) => {
     if (!user || !user.user.email) return;
     const colRef = collection(firestore, 'customerids');

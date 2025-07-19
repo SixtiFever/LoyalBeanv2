@@ -54,8 +54,8 @@ const CustomerRecordSocial: React.FC<CustomerRecordProps> = ({data}) => {
             <View style={styles.rightSideContainer}>
                 {/* <Text>{user?.displayName}</Text> */}
                 <Text>{data.userEmail}</Text>
-                <Text>{data.role} @ {data.employer}</Text>
-                <ScrollableInterests data={data.interests} />
+                <Text>{data.about}</Text>
+                <ScrollableInterests data={data.interests ?? []} />
                 {/* <Text>{data.beanType}</Text> */}
                 {/* <Text>{data.dateCardUpdated.toDate().toDateString()}</Text> */}
                 <View style={styles.buttonsContainer}>

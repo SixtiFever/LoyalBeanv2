@@ -9,8 +9,7 @@ export interface User {
 export interface Customer extends User {
     username?: string;
     cafes?: string[],
-    role?: string;
-    employer?: string;
+    about?: string;
     interests?: string[];
 }
 

@@ -2,6 +2,7 @@ import { BeanType } from "@/utils/utils";
 import { Timestamp } from "firebase/firestore";
 
 export type Card = {
+    username?: string;
     userId: string;
     cafeId: string;
     userEmail: string;
@@ -22,8 +23,7 @@ export type Card = {
     favouritePromotionId?: string;
     personalisedRewardActive?: boolean;
     interests?: string[],
-    role?: string,
-    employer?: string,
+    about?: string,
 }
 
 export type PromotionRedeem = Record<string, {reward: string}>

@@ -72,8 +72,8 @@ const CustomerSignup = () => {
     }
 
     const handleChangeText = (type: string, e?: any) => {
-        console.log(interests)
-        if ( type === 'username' || type === 'password' || type === 'email' || type == 'employer' || type == 'role' || type == 'interests') {
+
+        if ( type === 'username' || type === 'password' || type === 'email' || type == 'about' || type == 'interests') {
             setUser((prev: Partial<Customer>) => ({
                 ...prev, [type]: e }))
         } else {
@@ -141,34 +141,15 @@ const CustomerSignup = () => {
                             handleChangeText={handleChangeText}
                             type='confirmEmail'
                             />
-
-                        <CustomTextInput
-                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
-                            height={60} 
-                            widthPercentage={90} 
-                            placeholder='Job Role' 
-                            handleChangeText={handleChangeText}
-                            type='role'
-                            />
                         
                         <CustomTextInput
                             leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
                             height={60} 
                             widthPercentage={90} 
-                            placeholder='Employer' 
+                            placeholder='About you' 
                             handleChangeText={handleChangeText}
-                            type='employer'
+                            type='about'
                             />
-
-                        {/* <CustomTextInput
-                            leftIcon={<EmailIcon width="25" height="15" color="#D2CBCB" />}
-                            height={60} 
-                            widthPercentage={90} 
-                            placeholder='Interests (separted by comma)' 
-                            // handleChangeText={handleChangeText}
-                            onChangeText={setInterests}
-                            type='interests'
-                            /> */}
                         
                         <TextInput
                             style={styles.input}

@@ -1,7 +1,7 @@
 import { Card } from '@/types/Card';
 import { PromotionRecord } from '@/types/Promotion';
-import { Cafe } from '@/types/User';
-import { addCafeIdToCustomerAccount, checkForCard, fetchData, getActivePromotion, postNewCard, updatePromotionInteractions } from '@/utils/FirebaseController';
+import { Cafe, Customer } from '@/types/User';
+import { addCafeIdToCustomerAccount, checkForCard, fetchData, fetchUser, getActivePromotion, postNewCard, updatePromotionInteractions } from '@/utils/FirebaseController';
 import { BeanType, splitPattern } from '@/utils/utils';
 import { BarcodeScanningResult, CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
@@ -79,7 +79,16 @@ const ScanCamera = () => {
     }
 
     const updateCard = async (cafeId: string, customerId: string, quantity: number) => {
+        console.log(customerId)
+        console.log(user?.uid)
         const hasCard: boolean = await checkForCard(cafeId, customerId);
+        console.log('Before fetching customer')
+        const customer: Customer | false = await fetchUser(customerId);
+        console.log(customer)
+        if (!customer) {
+            console.log('Can\'t find customer');
+            return;
+        }
         if (hasCard) {
             alert('You already have this vendors card.\n Please use the scanner on the Your Cards screen.')
             return;
@@ -92,6 +101,7 @@ const ScanCamera = () => {
         // generate loyalty card for customer from the cafe document
         const cafeData: Cafe = await fetchData(cafeId, 'cafes') as Cafe;
         const card: Card = {
+            username: customer.username,
             userId: user?.uid,
             userEmail: user?.email ?? undefined,
             cafeId: cafeId,
@@ -107,6 +117,8 @@ const ScanCamera = () => {
             beanType: BeanType['Green Bean'],
             beanIconUri: '',
             cafeName: cafeData.shopname,
+            about: customer.about,
+            interests: customer.interests
         }
 
         // post card to cards
