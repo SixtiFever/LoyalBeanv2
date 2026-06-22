@@ -1,4 +1,4 @@
-import { PlusIcon } from "@/assets/icons";
+import { PlusIcon, StarIcon } from "@/assets/icons";
 import { PromotionCard } from "@/components/promotioncard";
 import { SortPicker } from "@/components/sortpicker";
 import { PromotionRecord } from "@/types/Promotion";
@@ -81,13 +81,35 @@ const PromotionalDataContainer: React.FC<PromotionalDataContainerProps> = ({prom
                         <PlusIcon onPress={handleNavCreateNew} width="20" height="20" />
                     </View>
                     <View style={styles.activeCurrentStats}>
-                        { activePromotion && <Text>Reward: {JSON.stringify(activePromotion.reward)}</Text> }
-                        { activePromotion && <Text>Milestone: {JSON.stringify(activePromotion.purchaseMilestone)}</Text> }
-                        { activePromotion && <Text>Scans: {JSON.stringify(activePromotion.scans)}</Text> }
-                        { activePromotion && <Text>Redeems: {JSON.stringify(activePromotion.redeems)}</Text> }
-                        { activePromotion && <Text>Days Running: {calculateDaysBetween(activePromotion.startDateTimestamp, Timestamp.now())}</Text> }
+                        <View style={styles.reward}>
+                            <StarIcon
+                                height="24"
+                                width="24"
+                            />
+                            { activePromotion && <Text style={[styles.statText, {paddingStart: 10}]}>{JSON.stringify(activePromotion.reward)}</Text> }
+                        </View>
+                        <View style={styles.statRow}>
+                            <View style={styles.statRowCell}>
+                                { activePromotion && <Text style={styles.statText}>{JSON.stringify(activePromotion.scans)}</Text> }
+                                <Text>Scans</Text>
+                            </View>
+                            <View style={styles.statRowCell}>
+                                { activePromotion && <Text style={styles.statText}>{JSON.stringify(activePromotion.redeems)}</Text> }
+                                <Text>Redeems</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.statRow}>
+                            <View style={styles.statRowCell}>
+                                { activePromotion && <Text style={styles.statText}>{JSON.stringify(activePromotion.purchaseMilestone)}</Text> }
+                                <Text>Milestone</Text>
+                            </View>
+                            <View style={styles.statRowCell}>
+                                { activePromotion && <Text style={styles.statText}>{calculateDaysBetween(activePromotion.startDateTimestamp, Timestamp.now())}</Text> }
+                                <Text>Days Run</Text>
+                            </View>
+                        </View>
                     </View>
-                    {/* { activePromotion && <Text>{JSON.stringify(activePromotion.)}</Text> } */}
                 </View>
             </View>
             <View style={styles.previousPromotionSection}>
@@ -130,7 +152,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     activeCurrentStats: {
-        paddingTop: 10,
+        paddingTop: 12,
+        display: 'flex',
+
+
     },
     topBarContainer: {
         display: 'flex',
@@ -152,6 +177,27 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
     },
+    reward: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    statRow: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignContent: 'space-evenly',
+        paddingTop: 4,
+    },
+    statRowCell: {
+        width: '50%',
+        display: 'flex',
+        height: 40,
+        alignItems: 'flex-start',
+        justifyContent: 'center'
+    },
+    statText: {
+    }
 })
 
 export default PromotionalDataContainer;
